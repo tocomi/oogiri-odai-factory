@@ -81,10 +81,6 @@ export default function DifficultySelector({
           )
         })}
       </div>
-
-      <div className="text-gray-600 text-sm">
-        お題の難易度を選択してください。
-      </div>
     </div>
   )
 }

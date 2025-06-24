@@ -24,9 +24,6 @@ export default function ResultsArea({
   onRegenerate,
   onFavorite,
 }: ResultsAreaProps) {
-  const totalResults =
-    results.openai.length + results.claude.length + results.gemini.length
-
   const isFavorite = (odai: string, source: AIProvider) => {
     return favorites.some((fav) => fav.text === odai && fav.source === source)
   }
@@ -157,38 +154,6 @@ export default function ResultsArea({
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         {renderAllCards()}
       </div>
-
-      {/* 統計情報 */}
-      {totalResults > 0 && !isLoading && (
-        <div className="rounded-lg bg-gray-50 p-4">
-          <div className="grid grid-cols-1 gap-4 text-center sm:grid-cols-4">
-            <div>
-              <div className="font-bold text-2xl text-purple-600">
-                {totalResults}
-              </div>
-              <div className="text-gray-600 text-sm">総お題数</div>
-            </div>
-            <div>
-              <div className="font-bold text-2xl text-blue-600">
-                {results.openai.length}
-              </div>
-              <div className="text-gray-600 text-sm">OpenAI</div>
-            </div>
-            <div>
-              <div className="font-bold text-2xl text-purple-600">
-                {results.claude.length}
-              </div>
-              <div className="text-gray-600 text-sm">Claude</div>
-            </div>
-            <div>
-              <div className="font-bold text-2xl text-orange-600">
-                {results.gemini.length}
-              </div>
-              <div className="text-gray-600 text-sm">Gemini</div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
