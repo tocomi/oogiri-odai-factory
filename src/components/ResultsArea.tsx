@@ -12,7 +12,6 @@ interface ResultsAreaProps {
   isLoading: boolean
   favorites: OdaiItem[]
   onCopy: (text: string) => void
-  onRegenerate: (source: AIProvider, index: number) => void
   onFavorite: (odai: string, source: AIProvider) => void
 }
 
@@ -21,7 +20,6 @@ export default function ResultsArea({
   isLoading,
   favorites,
   onCopy,
-  onRegenerate,
   onFavorite,
 }: ResultsAreaProps) {
   const isFavorite = (odai: string, source: AIProvider) => {
@@ -39,7 +37,6 @@ export default function ResultsArea({
             odai=""
             source="openai"
             onCopy={() => {}}
-            onRegenerate={() => {}}
             onFavorite={() => {}}
             isFavorite={false}
             isLoading={true}
@@ -52,7 +49,6 @@ export default function ResultsArea({
             odai=""
             source="claude"
             onCopy={() => {}}
-            onRegenerate={() => {}}
             onFavorite={() => {}}
             isFavorite={false}
             isLoading={true}
@@ -65,7 +61,6 @@ export default function ResultsArea({
             odai=""
             source="gemini"
             onCopy={() => {}}
-            onRegenerate={() => {}}
             onFavorite={() => {}}
             isFavorite={false}
             isLoading={true}
@@ -76,35 +71,32 @@ export default function ResultsArea({
 
     // 全てのお題を統合
     const allCards = [
-      ...results.openai.map((odai, index) => (
+      ...results.openai.map((odai) => (
         <OdaiCard
           key={`openai-${odai}`}
           odai={odai}
           source="openai"
           onCopy={() => onCopy(odai)}
-          onRegenerate={() => onRegenerate('openai', index)}
           onFavorite={() => onFavorite(odai, 'openai')}
           isFavorite={isFavorite(odai, 'openai')}
         />
       )),
-      ...results.claude.map((odai, index) => (
+      ...results.claude.map((odai) => (
         <OdaiCard
           key={`claude-${odai}`}
           odai={odai}
           source="claude"
           onCopy={() => onCopy(odai)}
-          onRegenerate={() => onRegenerate('claude', index)}
           onFavorite={() => onFavorite(odai, 'claude')}
           isFavorite={isFavorite(odai, 'claude')}
         />
       )),
-      ...results.gemini.map((odai, index) => (
+      ...results.gemini.map((odai) => (
         <OdaiCard
           key={`gemini-${odai}`}
           odai={odai}
           source="gemini"
           onCopy={() => onCopy(odai)}
-          onRegenerate={() => onRegenerate('gemini', index)}
           onFavorite={() => onFavorite(odai, 'gemini')}
           isFavorite={isFavorite(odai, 'gemini')}
         />
@@ -151,7 +143,7 @@ export default function ResultsArea({
   return (
     <div className="space-y-6">
       {/* 結果表示エリア */}
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-1">
         {renderAllCards()}
       </div>
     </div>

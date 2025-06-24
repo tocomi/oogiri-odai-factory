@@ -69,11 +69,6 @@ export default function Home() {
     console.log('Copied:', text)
   }
 
-  const handleRegenerate = async (source: AIProvider, index: number) => {
-    // 個別再生成機能（簡易実装）
-    console.log('Regenerate:', source, index)
-  }
-
   const handleFavorite = (odai: string, source: AIProvider) => {
     const existingIndex = state.favorites.findIndex(
       (fav) => fav.text === odai && fav.source === source,
@@ -157,7 +152,6 @@ export default function Home() {
               isLoading={state.isLoading}
               favorites={state.favorites}
               onCopy={handleCopy}
-              onRegenerate={handleRegenerate}
               onFavorite={handleFavorite}
             />
           </div>
