@@ -103,12 +103,8 @@ export default function Home() {
         {/* ヘッダー */}
         <header className="py-8 text-center">
           <h1 className="mb-4 font-bold text-4xl text-gray-900">
-            🎭 大喜利お題生成器
+            🏭 大喜利ネタ工場
           </h1>
-          <p className="mx-auto max-w-2xl text-gray-600 text-lg">
-            OpenAI、Claude、Geminiの3つのAIを使って、
-            多様で創造的な大喜利のお題を生成します
-          </p>
         </header>
 
         {/* エラー表示 */}

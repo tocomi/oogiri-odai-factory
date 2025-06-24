@@ -2,9 +2,9 @@ import type { Metadata } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: '大喜利お題生成器',
+  title: '大喜利ネタ工場',
   description:
-    '3つのAI（OpenAI、Claude、Gemini）を使って多様な大喜利のお題を生成するアプリ',
+    'AIが大量生産する創造的な大喜利お題 - 大喜利ネタ工場。OpenAI、Claude、Geminiの3つのAIを使って多様な大喜利お題を工場のように量産します',
 }
 
 export default function RootLayout({

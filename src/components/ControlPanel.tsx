@@ -29,10 +29,6 @@ export default function ControlPanel({
 
   return (
     <div className="space-y-6 rounded-lg bg-white p-6 shadow-md">
-      <h2 className="text-center font-bold text-2xl text-gray-900">
-        🎭 大喜利お題生成器
-      </h2>
-
       <div className="space-y-6">
         <div className="rounded-lg border border-gray-200 bg-gradient-to-r from-blue-50 via-purple-50 to-orange-50 p-4">
           <div className="mb-2 flex items-center justify-center gap-4">

@@ -1,34 +1,82 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🏭 大喜利ネタ工場
 
-## Getting Started
+3つのAI（OpenAI、Claude、Gemini）が連携して、笑いのある大喜利ネタを工場のように大量生産するNext.jsアプリケーションです。
 
-First, run the development server:
+## 特徴
+
+- **3つのAI連携**: OpenAI GPT、Claude、Geminiが同時に大喜利お題を生成
+- **多様性**: 各AIの個性を活かした異なるアプローチのお題
+- **カテゴリー別**: 日常、学校、職場など様々なシチュエーション
+- **難易度調整**: 初心者から上級者まで対応
+- **お気に入り機能**: 気に入ったお題を保存・管理
+
+## 使用技術
+
+- **Frontend**: Next.js 15, React 19, TypeScript
+- **Styling**: Tailwind CSS
+- **AI APIs**: OpenAI API, Anthropic Claude API, Google Gemini API
+- **Package Manager**: pnpm
+
+## セットアップ
+
+### 1. 依存関係のインストール
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. 環境変数の設定
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+`.env.local` ファイルを作成し、以下のAPIキーを設定してください：
 
-## Learn More
+```bash
+OPENAI_API_KEY=sk-proj-XXX
+ANTHROPIC_API_KEY=sk-ant-XXX
+GEMINI_API_KEY=XXX
+```
 
-To learn more about Next.js, take a look at the following resources:
+### 3. 開発サーバーの起動
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+pnpm run dev
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+[http://localhost:3000](http://localhost:3000) をブラウザで開いて確認してください。
 
-## Deploy on Vercel
+## 開発コマンド
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+pnpm run dev          # 開発サーバー起動
+pnpm run build        # プロダクションビルド
+pnpm run start        # プロダクションサーバー起動
+pnpm run check        # Biome によるコードチェック
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## プロジェクト構造
+
+```
+src/
+├── app/
+│   ├── api/              # API Routes
+│   │   ├── openai/       # OpenAI エンドポイント
+│   │   ├── claude/       # Claude エンドポイント
+│   │   ├── gemini/       # Gemini エンドポイント
+│   │   └── generate-all/ # 一括生成エンドポイント
+│   ├── globals.css       # グローバルスタイル
+│   ├── layout.tsx        # ルートレイアウト
+│   └── page.tsx          # メインページ
+├── components/           # UIコンポーネント
+├── lib/                  # AIクライアントとプロンプト
+└── types/                # TypeScript型定義
+```
+
+## 詳細ドキュメント
+
+- [設計ドキュメント](./docs/README.md) - アプリ概要、技術スタック、システム構成
+- [API設計](./docs/api-design.md) - エンドポイント、データ型、プロンプト戦略
+- [UI設計](./docs/ui-design.md) - レイアウト、コンポーネント、デザインシステム
+- [Claude Code ガイド](./CLAUDE.md) - 開発者向けガイド
+
+## ライセンス
+
+MIT License
