@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from 'react'
 import type { AIProvider, OdaiItem } from '@/types'
 import OdaiCard from './OdaiCard'
 
@@ -25,8 +24,6 @@ export default function ResultsArea({
   onRegenerate,
   onFavorite,
 }: ResultsAreaProps) {
-  const [activeTab, setActiveTab] = useState<'all' | AIProvider>('all')
-
   const totalResults =
     results.openai.length + results.claude.length + results.gemini.length
 
@@ -34,50 +31,90 @@ export default function ResultsArea({
     return favorites.some((fav) => fav.text === odai && fav.source === source)
   }
 
-  const getTabCount = (tab: 'all' | AIProvider) => {
-    if (tab === 'all') return totalResults
-    return results[tab].length
-  }
-
-  const renderCards = (odais: string[], source: AIProvider) => {
+  const renderAllCards = () => {
+    // ローディング中の表示
     if (isLoading) {
-      return Array.from({ length: 3 }, (_, i) => (
-        <OdaiCard
-          key={`loading-${source}-${i}`}
-          odai=""
-          source={source}
-          onCopy={() => {}}
-          onRegenerate={() => {}}
-          onFavorite={() => {}}
-          isFavorite={false}
-          isLoading={true}
-        />
-      ))
+      return [
+        ...Array.from({ length: 5 }, (_, i) => (
+          <OdaiCard
+            key={`loading-openai-${i}`}
+            odai=""
+            source="openai"
+            onCopy={() => {}}
+            onRegenerate={() => {}}
+            onFavorite={() => {}}
+            isFavorite={false}
+            isLoading={true}
+          />
+        )),
+        ...Array.from({ length: 5 }, (_, i) => (
+          <OdaiCard
+            key={`loading-claude-${i}`}
+            odai=""
+            source="claude"
+            onCopy={() => {}}
+            onRegenerate={() => {}}
+            onFavorite={() => {}}
+            isFavorite={false}
+            isLoading={true}
+          />
+        )),
+        ...Array.from({ length: 5 }, (_, i) => (
+          <OdaiCard
+            key={`loading-gemini-${i}`}
+            odai=""
+            source="gemini"
+            onCopy={() => {}}
+            onRegenerate={() => {}}
+            onFavorite={() => {}}
+            isFavorite={false}
+            isLoading={true}
+          />
+        )),
+      ]
     }
 
-    return odais.map((odai, index) => (
-      <OdaiCard
-        key={`${source}-${index}`}
-        odai={odai}
-        source={source}
-        onCopy={() => onCopy(odai)}
-        onRegenerate={() => onRegenerate(source, index)}
-        onFavorite={() => onFavorite(odai, source)}
-        isFavorite={isFavorite(odai, source)}
-      />
-    ))
-  }
-
-  const renderAllCards = () => {
+    // 全てのお題を統合
     const allCards = [
-      ...renderCards(results.openai, 'openai'),
-      ...renderCards(results.claude, 'claude'),
-      ...renderCards(results.gemini, 'gemini'),
+      ...results.openai.map((odai, index) => (
+        <OdaiCard
+          key={`openai-${index}`}
+          odai={odai}
+          source="openai"
+          onCopy={() => onCopy(odai)}
+          onRegenerate={() => onRegenerate('openai', index)}
+          onFavorite={() => onFavorite(odai, 'openai')}
+          isFavorite={isFavorite(odai, 'openai')}
+        />
+      )),
+      ...results.claude.map((odai, index) => (
+        <OdaiCard
+          key={`claude-${index}`}
+          odai={odai}
+          source="claude"
+          onCopy={() => onCopy(odai)}
+          onRegenerate={() => onRegenerate('claude', index)}
+          onFavorite={() => onFavorite(odai, 'claude')}
+          isFavorite={isFavorite(odai, 'claude')}
+        />
+      )),
+      ...results.gemini.map((odai, index) => (
+        <OdaiCard
+          key={`gemini-${index}`}
+          odai={odai}
+          source="gemini"
+          onCopy={() => onCopy(odai)}
+          onRegenerate={() => onRegenerate('gemini', index)}
+          onFavorite={() => onFavorite(odai, 'gemini')}
+          isFavorite={isFavorite(odai, 'gemini')}
+        />
+      )),
     ]
 
-    if (allCards.length === 0 && !isLoading) {
-      return (
-        <div className="col-span-full flex flex-col items-center justify-center py-12 text-gray-500">
+    // 空状態の表示
+    if (allCards.length === 0) {
+      return [
+        <div key="empty-state" className="col-span-full flex flex-col items-center justify-center py-12 text-gray-500">
           <svg
             className="w-16 h-16 mb-4"
             fill="none"
@@ -95,12 +132,12 @@ export default function ResultsArea({
             お題を生成してみましょう！
           </h3>
           <p className="text-center">
-            上の設定でAIとカテゴリを選択して、
+            カテゴリと難易度を選択して、
             <br />
             「お題を生成する」ボタンを押してください。
           </p>
         </div>
-      )
+      ]
     }
 
     return allCards
@@ -108,59 +145,9 @@ export default function ResultsArea({
 
   return (
     <div className="space-y-6">
-      {/* タブナビゲーション */}
-      <div className="flex flex-wrap gap-2">
-        <button
-          onClick={() => setActiveTab('all')}
-          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-            activeTab === 'all'
-              ? 'bg-purple-500 text-white'
-              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-          }`}
-        >
-          すべて ({getTabCount('all')})
-        </button>
-
-        <button
-          onClick={() => setActiveTab('openai')}
-          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-            activeTab === 'openai'
-              ? 'bg-blue-500 text-white'
-              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-          }`}
-        >
-          OpenAI ({getTabCount('openai')})
-        </button>
-
-        <button
-          onClick={() => setActiveTab('claude')}
-          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-            activeTab === 'claude'
-              ? 'bg-purple-500 text-white'
-              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-          }`}
-        >
-          Claude ({getTabCount('claude')})
-        </button>
-
-        <button
-          onClick={() => setActiveTab('gemini')}
-          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-            activeTab === 'gemini'
-              ? 'bg-orange-500 text-white'
-              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-          }`}
-        >
-          Gemini ({getTabCount('gemini')})
-        </button>
-      </div>
-
       {/* 結果表示エリア */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {activeTab === 'all' && renderAllCards()}
-        {activeTab === 'openai' && renderCards(results.openai, 'openai')}
-        {activeTab === 'claude' && renderCards(results.claude, 'claude')}
-        {activeTab === 'gemini' && renderCards(results.gemini, 'gemini')}
+        {renderAllCards()}
       </div>
 
       {/* 統計情報 */}

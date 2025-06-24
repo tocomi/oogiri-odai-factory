@@ -21,79 +21,39 @@ export default function Home() {
     setState((prev) => ({ ...prev, isLoading: true, error: null }))
 
     try {
-      if (params.selectedAIs.length === 1) {
-        // 単一AI生成
-        const ai = params.selectedAIs[0]
-        const response = await fetch(`/api/${ai}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            category: params.category || undefined,
-            difficulty: params.difficulty,
-            count: params.count,
-          }),
-        })
+      // 常に全AI生成
+      const response = await fetch('/api/generate-all', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          category: params.category || undefined,
+          difficulty: params.difficulty,
+          count: params.count,
+        }),
+      })
 
-        const result = await response.json()
+      const result = await response.json()
 
-        if (result.success && result.data) {
-          setState((prev) => ({
-            ...prev,
-            isLoading: false,
-            results: {
-              openai: ai === 'openai' ? result.data.odais : [],
-              claude: ai === 'claude' ? result.data.odais : [],
-              gemini: ai === 'gemini' ? result.data.odais : [],
-            },
-          }))
-        } else {
-          setState((prev) => ({
-            ...prev,
-            isLoading: false,
-            error: result.error || 'お題の生成に失敗しました',
-          }))
+      if (result.success && result.data) {
+        setState((prev) => ({
+          ...prev,
+          isLoading: false,
+          results: {
+            openai: result.data.openai,
+            claude: result.data.claude,
+            gemini: result.data.gemini,
+          },
+        }))
+
+        if (result.errors) {
+          console.warn('Some AI services had errors:', result.errors)
         }
       } else {
-        // 複数AI生成
-        const response = await fetch('/api/generate-all', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            category: params.category || undefined,
-            difficulty: params.difficulty,
-            count: params.count,
-          }),
-        })
-
-        const result = await response.json()
-
-        if (result.success && result.data) {
-          setState((prev) => ({
-            ...prev,
-            isLoading: false,
-            results: {
-              openai: params.selectedAIs.includes('openai')
-                ? result.data.openai
-                : [],
-              claude: params.selectedAIs.includes('claude')
-                ? result.data.claude
-                : [],
-              gemini: params.selectedAIs.includes('gemini')
-                ? result.data.gemini
-                : [],
-            },
-          }))
-
-          if (result.errors) {
-            console.warn('Some AI services had errors:', result.errors)
-          }
-        } else {
-          setState((prev) => ({
-            ...prev,
-            isLoading: false,
-            error: result.error || 'お題の生成に失敗しました',
-          }))
-        }
+        setState((prev) => ({
+          ...prev,
+          isLoading: false,
+          error: result.error || 'お題の生成に失敗しました',
+        }))
       }
     } catch (error) {
       console.error('Generation error:', error)

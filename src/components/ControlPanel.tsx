@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import type { GenerateParams } from '@/types'
-import AISelector from './AISelector'
 import CategorySelector from './CategorySelector'
 import DifficultySelector from './DifficultySelector'
 
@@ -15,25 +14,16 @@ export default function ControlPanel({
   onGenerate,
   isLoading,
 }: ControlPanelProps) {
-  const [selectedAIs, setSelectedAIs] = useState<GenerateParams['selectedAIs']>(
-    ['openai', 'claude', 'gemini'],
-  )
   const [category, setCategory] = useState<GenerateParams['category']>('')
   const [difficulty, setDifficulty] =
     useState<GenerateParams['difficulty']>('medium')
-  const [count, setCount] = useState<number>(3)
 
   const handleGenerate = () => {
-    if (selectedAIs.length === 0) {
-      alert('少なくとも1つのAIを選択してください')
-      return
-    }
-
     onGenerate({
-      selectedAIs,
+      selectedAIs: ['openai', 'claude', 'gemini'], // 常に全AI選択
       category,
       difficulty,
-      count,
+      count: 5, // 固定で5個
     })
   }
 
@@ -44,10 +34,29 @@ export default function ControlPanel({
       </h2>
 
       <div className="space-y-6">
-        <AISelector
-          selectedAIs={selectedAIs}
-          onSelectionChange={setSelectedAIs}
-        />
+        <div className="bg-gradient-to-r from-blue-50 via-purple-50 to-orange-50 rounded-lg p-4 border border-gray-200">
+          <div className="flex items-center justify-center gap-4 mb-2">
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+              <span className="text-sm font-medium text-blue-700">OpenAI</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-purple-500"></div>
+              <span className="text-sm font-medium text-purple-700">
+                Claude
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-orange-500"></div>
+              <span className="text-sm font-medium text-orange-700">
+                Gemini
+              </span>
+            </div>
+          </div>
+          <p className="text-center text-sm text-gray-600">
+            3つのAIが異なる視点でお題を生成します
+          </p>
+        </div>
 
         <CategorySelector
           selectedCategory={category}
@@ -59,29 +68,9 @@ export default function ControlPanel({
           onDifficultyChange={setDifficulty}
         />
 
-        <div className="space-y-4">
-          <h3 className="text-lg font-medium text-gray-900">生成数</h3>
-          <div className="flex items-center gap-4">
-            <input
-              type="range"
-              min="1"
-              max="5"
-              value={count}
-              onChange={(e) => setCount(Number(e.target.value))}
-              className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
-            />
-            <div className="w-12 text-center font-medium text-gray-900">
-              {count}個
-            </div>
-          </div>
-          <div className="text-sm text-gray-600">
-            各AIから生成するお題の数を選択してください
-          </div>
-        </div>
-
         <button
           onClick={handleGenerate}
-          disabled={isLoading || selectedAIs.length === 0}
+          disabled={isLoading}
           className="w-full py-4 px-6 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 disabled:from-gray-400 disabled:to-gray-500 text-white font-semibold rounded-lg transition-all duration-200 flex items-center justify-center gap-2"
         >
           {isLoading ? (
