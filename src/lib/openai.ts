@@ -20,13 +20,12 @@ export async function generateOdaiWithOpenAI(
       }
     }
 
-    const prompt = buildPrompt(
-      'openai',
+    const prompt = buildPrompt({
       category,
       difficulty,
       count,
       customPrompt,
-    )
+    })
 
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o-mini',

@@ -20,13 +20,12 @@ export async function generateOdaiWithClaude(
       }
     }
 
-    const prompt = buildPrompt(
-      'claude',
+    const prompt = buildPrompt({
       category,
       difficulty,
       count,
       customPrompt,
-    )
+    })
 
     const message = await anthropic.messages.create({
       model: 'claude-3-7-sonnet-latest',

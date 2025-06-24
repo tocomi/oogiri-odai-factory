@@ -54,25 +54,11 @@ AとBのカテゴリの境界、価値の曖昧な領域について問う。
 お題のみを改行区切りで出力してください。番号や説明は不要です。
 `
 
-export const AI_SPECIFIC_PROMPTS = {
-  openai: `
-論理的で構造化された大喜利のお題を作成してください。
-明確な設定と分かりやすいルールを持つお題を重視してください。
-「もしも〜だったら」「〜する時の決まり事」のような論理的な枠組みのあるお題が得意です。
-`,
-
-  claude: `
+export const AI_PROMPT = `
 創造的でユーモアあふれる表現を使った大喜利のお題を作成してください。
 言葉の美しさや情感を重視してください。
 比喩や擬人法を使った表現力豊かなお題、物語性のあるお題が得意です。
-`,
-
-  gemini: `
-現代的でトレンドを反映した大喜利のお題を作成してください。
-最新の話題や社会情勢、流行を取り入れた内容を重視してください。
-SNSやデジタル文化、現代社会の特徴を活かしたお題が得意です。
-`,
-} as const
+`
 
 export const CATEGORY_PROMPTS = {
   daily:
@@ -119,17 +105,21 @@ export const DIFFICULTY_PROMPTS = {
   hard: '高度な発想力や創造性が必要な、上級者向けのお題にしてください。複雑な設定や制約があり、独創的なアイデアが求められるお題にしてください。',
 } as const
 
-export function buildPrompt(
-  aiProvider: keyof typeof AI_SPECIFIC_PROMPTS,
-  category?: Category,
-  difficulty?: Difficulty,
-  count: number = 5,
-  customPrompt?: string,
-): string {
+export function buildPrompt({
+  category,
+  difficulty,
+  count = 5,
+  customPrompt,
+}: {
+  category?: Category
+  difficulty?: Difficulty
+  count: number
+  customPrompt?: string
+}): string {
   let prompt = BASE_PROMPT
 
-  // AI固有のプロンプトを追加
-  prompt += `\n\n${AI_SPECIFIC_PROMPTS[aiProvider]}`
+  // 追加のプロンプトを設定
+  prompt += `\n\n${AI_PROMPT}`
 
   // カテゴリが指定されている場合
   if (category && CATEGORY_PROMPTS[category]) {

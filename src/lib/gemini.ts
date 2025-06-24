@@ -26,13 +26,12 @@ export async function generateOdaiWithGemini(
       },
     })
 
-    const prompt = buildPrompt(
-      'gemini',
+    const prompt = buildPrompt({
       category,
       difficulty,
       count,
       customPrompt,
-    )
+    })
 
     const result = await model.generateContent(prompt)
     const response = await result.response
