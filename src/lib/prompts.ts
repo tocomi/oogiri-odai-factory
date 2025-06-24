@@ -129,21 +129,21 @@ export function buildPrompt(
   let prompt = BASE_PROMPT
 
   // AI固有のプロンプトを追加
-  prompt += '\n\n' + AI_SPECIFIC_PROMPTS[aiProvider]
+  prompt += `\n\n${AI_SPECIFIC_PROMPTS[aiProvider]}`
 
   // カテゴリが指定されている場合
   if (category && CATEGORY_PROMPTS[category]) {
-    prompt += '\n\n【カテゴリ指定】\n' + CATEGORY_PROMPTS[category]
+    prompt += `\n\n【カテゴリ指定】\n${CATEGORY_PROMPTS[category]}`
   }
 
   // 難易度が指定されている場合
   if (difficulty && DIFFICULTY_PROMPTS[difficulty]) {
-    prompt += '\n\n【難易度設定】\n' + DIFFICULTY_PROMPTS[difficulty]
+    prompt += `\n\n【難易度設定】\n${DIFFICULTY_PROMPTS[difficulty]}`
   }
 
   // カスタムプロンプトが指定されている場合
   if (customPrompt) {
-    prompt += '\n\n【追加要望】\n' + customPrompt
+    prompt += `\n\n【追加要望】\n${customPrompt}`
   }
 
   // 生成数を指定

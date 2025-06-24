@@ -14,13 +14,13 @@ export default function CategorySelector({
 }: CategorySelectorProps) {
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-medium text-gray-900">カテゴリ選択</h3>
+      <h3 className="font-medium text-gray-900 text-lg">カテゴリ選択</h3>
 
       <div className="relative">
         <select
           value={selectedCategory}
           onChange={(e) => onCategoryChange(e.target.value as Category | '')}
-          className="w-full p-3 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-purple-500 focus:border-transparent appearance-none"
+          className="w-full appearance-none rounded-lg border border-gray-300 bg-white p-3 text-gray-900 focus:border-transparent focus:ring-2 focus:ring-purple-500"
         >
           <option value="">すべてのカテゴリ</option>
           {CATEGORIES.map((category) => (
@@ -30,9 +30,11 @@ export default function CategorySelector({
           ))}
         </select>
 
-        <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
           <svg
-            className="w-5 h-5 text-gray-400"
+            role="img"
+            aria-label="arrow-down"
+            className="h-5 w-5 text-gray-400"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -48,8 +50,8 @@ export default function CategorySelector({
       </div>
 
       {selectedCategory && (
-        <div className="p-3 bg-purple-50 rounded-lg">
-          <div className="flex items-center gap-2 mb-1">
+        <div className="rounded-lg bg-purple-50 p-3">
+          <div className="mb-1 flex items-center gap-2">
             <span className="text-lg">
               {CATEGORIES.find((c) => c.id === selectedCategory)?.icon}
             </span>
@@ -57,24 +59,25 @@ export default function CategorySelector({
               {CATEGORIES.find((c) => c.id === selectedCategory)?.name}
             </span>
           </div>
-          <p className="text-sm text-purple-700">
+          <p className="text-purple-700 text-sm">
             {CATEGORIES.find((c) => c.id === selectedCategory)?.description}
           </p>
         </div>
       )}
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
         {CATEGORIES.slice(0, 8).map((category) => (
           <button
+            type="button"
             key={category.id}
             onClick={() => onCategoryChange(category.id)}
-            className={`p-2 rounded-md text-sm transition-colors ${
+            className={`rounded-md p-2 text-sm transition-colors ${
               selectedCategory === category.id
                 ? 'bg-purple-500 text-white'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
-            <div className="text-base mb-1">{category.icon}</div>
+            <div className="mb-1 text-base">{category.icon}</div>
             <div className="text-xs">{category.name}</div>
           </button>
         ))}

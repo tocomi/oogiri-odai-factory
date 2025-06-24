@@ -53,25 +53,27 @@ export default function AISelector({
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-medium text-gray-900">AI選択</h3>
+        <h3 className="font-medium text-gray-900 text-lg">AI選択</h3>
         <button
+          type="button"
           onClick={handleSelectAll}
-          className="text-sm text-blue-600 hover:text-blue-800 transition-colors"
+          className="text-blue-600 text-sm transition-colors hover:text-blue-800"
         >
           {selectedAIs.length === 3 ? '全て解除' : '全て選択'}
         </button>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         {(['openai', 'claude', 'gemini'] as AIProvider[]).map((ai) => {
           const isSelected = selectedAIs.includes(ai)
           const aiInfo = AI_INFO[ai]
 
           return (
             <button
+              type="button"
               key={ai}
               onClick={() => handleAIToggle(ai)}
-              className={`p-4 rounded-lg border-2 transition-all duration-200 text-left ${
+              className={`rounded-lg border-2 p-4 text-left transition-all duration-200 ${
                 isSelected
                   ? getAIActiveColor(ai)
                   : `${getAIColor(ai)} hover:border-gray-300`
@@ -79,7 +81,7 @@ export default function AISelector({
             >
               <div className="flex items-center gap-3">
                 <div
-                  className={`w-3 h-3 rounded-full ${
+                  className={`h-3 w-3 rounded-full ${
                     isSelected
                       ? 'bg-white'
                       : ai === 'openai'
@@ -105,7 +107,7 @@ export default function AISelector({
         })}
       </div>
 
-      <div className="text-sm text-gray-600">
+      <div className="text-gray-600 text-sm">
         選択したAIからお題を生成します。複数選択可能です。
       </div>
     </div>

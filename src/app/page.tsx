@@ -104,13 +104,13 @@ export default function Home() {
 
   return (
     <main className="min-h-screen p-4">
-      <div className="max-w-7xl mx-auto space-y-8">
+      <div className="mx-auto max-w-7xl space-y-8">
         {/* ヘッダー */}
-        <header className="text-center py-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+        <header className="py-8 text-center">
+          <h1 className="mb-4 font-bold text-4xl text-gray-900">
             🎭 大喜利お題生成器
           </h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          <p className="mx-auto max-w-2xl text-gray-600 text-lg">
             OpenAI、Claude、Geminiの3つのAIを使って、
             多様で創造的な大喜利のお題を生成します
           </p>
@@ -118,10 +118,12 @@ export default function Home() {
 
         {/* エラー表示 */}
         {state.error && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="rounded-lg border border-red-200 bg-red-50 p-4">
             <div className="flex items-center gap-2 text-red-700">
               <svg
-                className="w-5 h-5"
+                role="img"
+                aria-label="error"
+                className="h-5 w-5"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -139,7 +141,7 @@ export default function Home() {
         )}
 
         {/* メインコンテンツ */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
           {/* コントロールパネル */}
           <div className="lg:col-span-1">
             <ControlPanel
@@ -162,7 +164,7 @@ export default function Home() {
         </div>
 
         {/* フッター */}
-        <footer className="text-center py-8 text-gray-500">
+        <footer className="py-8 text-center text-gray-500">
           <p>Powered by OpenAI GPT, Claude, and Gemini</p>
         </footer>
       </div>

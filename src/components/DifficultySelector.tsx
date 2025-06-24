@@ -36,18 +36,19 @@ export default function DifficultySelector({
 
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-medium text-gray-900">難易度選択</h3>
+      <h3 className="font-medium text-gray-900 text-lg">難易度選択</h3>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         {(['easy', 'medium', 'hard'] as Difficulty[]).map((difficulty) => {
           const isSelected = selectedDifficulty === difficulty
           const difficultyInfo = DIFFICULTY_INFO[difficulty]
 
           return (
             <button
+              type="button"
               key={difficulty}
               onClick={() => onDifficultyChange(difficulty)}
-              className={`p-4 rounded-lg border-2 transition-all duration-200 text-left ${
+              className={`rounded-lg border-2 p-4 text-left transition-all duration-200 ${
                 isSelected
                   ? getDifficultyActiveColor(difficulty)
                   : `${getDifficultyColor(difficulty)} hover:border-gray-300`
@@ -55,7 +56,7 @@ export default function DifficultySelector({
             >
               <div className="flex items-center gap-3">
                 <div
-                  className={`w-3 h-3 rounded-full ${
+                  className={`h-3 w-3 rounded-full ${
                     isSelected
                       ? 'bg-white'
                       : difficulty === 'easy'
@@ -81,7 +82,7 @@ export default function DifficultySelector({
         })}
       </div>
 
-      <div className="text-sm text-gray-600">
+      <div className="text-gray-600 text-sm">
         お題の難易度を選択してください。
       </div>
     </div>

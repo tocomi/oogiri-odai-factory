@@ -28,32 +28,32 @@ export default function ControlPanel({
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6 space-y-6">
-      <h2 className="text-2xl font-bold text-gray-900 text-center">
+    <div className="space-y-6 rounded-lg bg-white p-6 shadow-md">
+      <h2 className="text-center font-bold text-2xl text-gray-900">
         🎭 大喜利お題生成器
       </h2>
 
       <div className="space-y-6">
-        <div className="bg-gradient-to-r from-blue-50 via-purple-50 to-orange-50 rounded-lg p-4 border border-gray-200">
-          <div className="flex items-center justify-center gap-4 mb-2">
+        <div className="rounded-lg border border-gray-200 bg-gradient-to-r from-blue-50 via-purple-50 to-orange-50 p-4">
+          <div className="mb-2 flex items-center justify-center gap-4">
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-              <span className="text-sm font-medium text-blue-700">OpenAI</span>
+              <div className="h-3 w-3 rounded-full bg-blue-500"></div>
+              <span className="font-medium text-blue-700 text-sm">OpenAI</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-purple-500"></div>
-              <span className="text-sm font-medium text-purple-700">
+              <div className="h-3 w-3 rounded-full bg-purple-500"></div>
+              <span className="font-medium text-purple-700 text-sm">
                 Claude
               </span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-orange-500"></div>
-              <span className="text-sm font-medium text-orange-700">
+              <div className="h-3 w-3 rounded-full bg-orange-500"></div>
+              <span className="font-medium text-orange-700 text-sm">
                 Gemini
               </span>
             </div>
           </div>
-          <p className="text-center text-sm text-gray-600">
+          <p className="text-center text-gray-600 text-sm">
             3つのAIが異なる視点でお題を生成します
           </p>
         </div>
@@ -69,14 +69,17 @@ export default function ControlPanel({
         />
 
         <button
+          type="button"
           onClick={handleGenerate}
           disabled={isLoading}
-          className="w-full py-4 px-6 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 disabled:from-gray-400 disabled:to-gray-500 text-white font-semibold rounded-lg transition-all duration-200 flex items-center justify-center gap-2"
+          className="flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-purple-500 to-purple-600 px-6 py-4 font-semibold text-white transition-all duration-200 hover:from-purple-600 hover:to-purple-700 disabled:from-gray-400 disabled:to-gray-500"
         >
           {isLoading ? (
             <>
               <svg
-                className="animate-spin h-5 w-5"
+                role="img"
+                aria-label="loading"
+                className="h-5 w-5 animate-spin"
                 fill="none"
                 viewBox="0 0 24 24"
               >
@@ -99,7 +102,9 @@ export default function ControlPanel({
           ) : (
             <>
               <svg
-                className="w-5 h-5"
+                role="img"
+                aria-label="generate"
+                className="h-5 w-5"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"

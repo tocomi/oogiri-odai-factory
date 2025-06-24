@@ -47,54 +47,57 @@ export default function OdaiCard({
 
   if (isLoading) {
     return (
-      <div className="bg-white rounded-lg shadow-md p-6 animate-pulse">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 bg-gray-200 rounded-full"></div>
-          <div className="h-4 bg-gray-200 rounded w-20"></div>
+      <div className="animate-pulse rounded-lg bg-white p-6 shadow-md">
+        <div className="mb-4 flex items-center gap-3">
+          <div className="h-10 w-10 rounded-full bg-gray-200"></div>
+          <div className="h-4 w-20 rounded bg-gray-200"></div>
         </div>
-        <div className="space-y-2 mb-4">
-          <div className="h-4 bg-gray-200 rounded w-full"></div>
-          <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+        <div className="mb-4 space-y-2">
+          <div className="h-4 w-full rounded bg-gray-200"></div>
+          <div className="h-4 w-3/4 rounded bg-gray-200"></div>
         </div>
         <div className="flex gap-2">
-          <div className="h-8 bg-gray-200 rounded w-16"></div>
-          <div className="h-8 bg-gray-200 rounded w-16"></div>
-          <div className="h-8 bg-gray-200 rounded w-8"></div>
+          <div className="h-8 w-16 rounded bg-gray-200"></div>
+          <div className="h-8 w-16 rounded bg-gray-200"></div>
+          <div className="h-8 w-8 rounded bg-gray-200"></div>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 p-6 card-hover animate-fade-in-up">
+    <div className="card-hover animate-fade-in-up rounded-lg bg-white p-6 shadow-md transition-shadow duration-200 hover:shadow-lg">
       {/* ヘッダー */}
-      <div className="flex items-center gap-3 mb-4">
+      <div className="mb-4 flex items-center gap-3">
         <div
-          className={`w-10 h-10 rounded-full bg-gradient-to-r ${getSourceColor(source)} flex items-center justify-center text-white font-bold text-sm`}
+          className={`flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r font-bold text-sm text-white ${getSourceColor(source)}`}
         >
           {source === 'openai' ? 'GPT' : source === 'claude' ? 'CL' : 'GM'}
         </div>
         <div>
           <div className="font-medium text-gray-900">{aiInfo.name}</div>
-          <div className="text-sm text-gray-500">{aiInfo.description}</div>
+          <div className="text-gray-500 text-sm">{aiInfo.description}</div>
         </div>
       </div>
 
       {/* お題テキスト */}
       <div className="mb-4">
-        <p className="text-gray-800 leading-relaxed text-base">{odai}</p>
+        <p className="text-base text-gray-800 leading-relaxed">{odai}</p>
       </div>
 
       {/* アクションボタン */}
       <div className="flex items-center gap-2">
         <button
+          type="button"
           onClick={handleCopy}
-          className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm rounded-md transition-colors duration-150 flex items-center gap-1"
+          className="flex items-center gap-1 rounded-md bg-gray-100 px-3 py-1.5 text-gray-700 text-sm transition-colors duration-150 hover:bg-gray-200"
         >
           {showCopied ? (
             <>
               <svg
-                className="w-4 h-4"
+                role="img"
+                aria-label="copy"
+                className="h-4 w-4"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -111,7 +114,9 @@ export default function OdaiCard({
           ) : (
             <>
               <svg
-                className="w-4 h-4"
+                role="img"
+                aria-label="copy"
+                className="h-4 w-4"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -129,11 +134,14 @@ export default function OdaiCard({
         </button>
 
         <button
+          type="button"
           onClick={onRegenerate}
-          className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm rounded-md transition-colors duration-150 flex items-center gap-1"
+          className="flex items-center gap-1 rounded-md bg-gray-100 px-3 py-1.5 text-gray-700 text-sm transition-colors duration-150 hover:bg-gray-200"
         >
           <svg
-            className="w-4 h-4"
+            role="img"
+            aria-label="regenerate"
+            className="h-4 w-4"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -149,15 +157,18 @@ export default function OdaiCard({
         </button>
 
         <button
+          type="button"
           onClick={onFavorite}
-          className={`p-1.5 rounded-md transition-colors duration-150 ${
+          className={`rounded-md p-1.5 transition-colors duration-150 ${
             isFavorite
               ? 'text-yellow-500 hover:text-yellow-600'
               : 'text-gray-400 hover:text-yellow-500'
           }`}
         >
           <svg
-            className="w-5 h-5"
+            role="img"
+            aria-label="favorite"
+            className="h-5 w-5"
             fill={isFavorite ? 'currentColor' : 'none'}
             stroke="currentColor"
             viewBox="0 0 24 24"
