@@ -16,7 +16,7 @@ export default function ControlPanel({
 }: ControlPanelProps) {
   const [category, setCategory] = useState<GenerateParams['category']>('')
   const [difficulty, setDifficulty] =
-    useState<GenerateParams['difficulty']>('medium')
+    useState<GenerateParams['difficulty']>('easy')
 
   const handleGenerate = () => {
     onGenerate({
