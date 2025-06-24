@@ -44,13 +44,13 @@ export async function POST(request: NextRequest) {
       openaiResult.value.success &&
       openaiResult.value.data
     ) {
-      response.data!.openai = openaiResult.value.data.odais
+      response.data.openai = openaiResult.value.data.odais
     } else {
       const errorMessage =
         openaiResult.status === 'fulfilled'
           ? openaiResult.value.error || 'Unknown error'
           : 'Request failed'
-      response.errors!.openai = errorMessage
+      response.errors.openai = errorMessage
     }
 
     // Claude結果を処理
@@ -59,13 +59,13 @@ export async function POST(request: NextRequest) {
       claudeResult.value.success &&
       claudeResult.value.data
     ) {
-      response.data!.claude = claudeResult.value.data.odais
+      response.data.claude = claudeResult.value.data.odais
     } else {
       const errorMessage =
         claudeResult.status === 'fulfilled'
           ? claudeResult.value.error || 'Unknown error'
           : 'Request failed'
-      response.errors!.claude = errorMessage
+      response.errors.claude = errorMessage
     }
 
     // Gemini結果を処理
@@ -74,23 +74,23 @@ export async function POST(request: NextRequest) {
       geminiResult.value.success &&
       geminiResult.value.data
     ) {
-      response.data!.gemini = geminiResult.value.data.odais
+      response.data.gemini = geminiResult.value.data.odais
     } else {
       const errorMessage =
         geminiResult.status === 'fulfilled'
           ? geminiResult.value.error || 'Unknown error'
           : 'Request failed'
-      response.errors!.gemini = errorMessage
+      response.errors.gemini = errorMessage
     }
 
     // 総数を計算
-    response.data!.totalCount =
-      response.data!.openai.length +
-      response.data!.claude.length +
-      response.data!.gemini.length
+    response.data.totalCount =
+      response.data.openai.length +
+      response.data.claude.length +
+      response.data.gemini.length
 
     // 全て失敗した場合はエラーレスポンス
-    if (response.data!.totalCount === 0) {
+    if (response.data.totalCount === 0) {
       return NextResponse.json(
         {
           success: false,
@@ -102,7 +102,8 @@ export async function POST(request: NextRequest) {
     }
 
     // エラーがない場合は errors プロパティを削除
-    if (Object.keys(response.errors!).length === 0) {
+    if (Object.keys(response.errors).length === 0) {
+      // @ts-expect-error
       delete response.errors
     }
 

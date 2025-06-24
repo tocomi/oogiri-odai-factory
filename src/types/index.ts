@@ -50,13 +50,13 @@ export interface GenerateAllRequest {
 
 export interface GenerateAllResponse {
   success: boolean
-  data?: {
+  data: {
     openai: string[]
     claude: string[]
     gemini: string[]
     totalCount: number
   }
-  errors?: {
+  errors: {
     openai?: string
     claude?: string
     gemini?: string
