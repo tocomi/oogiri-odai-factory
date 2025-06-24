@@ -192,7 +192,7 @@ export const AI_INFO = {
   },
   claude: {
     name: 'Claude',
-    description: '創造的で文学的なお題',
+    description: '創造的でユーモア溢れるお題',
     color: 'purple',
   },
   gemini: {

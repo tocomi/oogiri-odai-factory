@@ -59,7 +59,7 @@ export async function generateOdaiWithGemini(
       data: {
         odais,
         source: 'gemini',
-        model: 'gemini-1.5-flash',
+        model: 'gemini-2.0-flash',
         tokens: response.usageMetadata?.totalTokenCount,
       },
     }
