@@ -12,6 +12,7 @@
     "@anthropic-ai/sdk": "^0.54.0",
     "@biomejs/biome": "^2.0.5",
     "@google/generative-ai": "^0.24.1",
+    "@vercel/analytics": "^1.5.0",
     "next": "15.3.4",
     "openai": "^5.7.0",
     "react": "^19.0.0",

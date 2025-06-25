@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import './globals.css'
+import { Analytics } from '@vercel/analytics/next'
 
 export const metadata: Metadata = {
   title: '大喜利ネタ工場',
@@ -16,6 +17,7 @@ export default function RootLayout({
     <html lang="ja">
       <body className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50">
         {children}
+        <Analytics />
       </body>
     </html>
   )
