@@ -2,7 +2,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai'
 import type { Category, Difficulty, OdaiResponse } from '@/types'
 import { buildPrompt, parseOdaiResponse } from './prompts'
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '')
+const GEMINI_MODEL = 'gemini-1.5-flash-latest'
 
 export async function generateOdaiWithGemini(
   category?: Category,
@@ -11,15 +11,19 @@ export async function generateOdaiWithGemini(
   customPrompt?: string,
 ): Promise<OdaiResponse> {
   try {
-    if (!process.env.GEMINI_API_KEY) {
+    const apiKey = process.env.GEMINI_API_KEY
+
+    if (!apiKey) {
       return {
         success: false,
         error: 'GEMINI_API_KEY is not configured',
       }
     }
 
+    const genAI = new GoogleGenerativeAI(apiKey)
+
     const model = genAI.getGenerativeModel({
-      model: 'gemini-1.5-flash',
+      model: GEMINI_MODEL,
       generationConfig: {
         temperature: 0.8,
         maxOutputTokens: 1000,
@@ -58,7 +62,7 @@ export async function generateOdaiWithGemini(
       data: {
         odais,
         source: 'gemini',
-        model: 'gemini-2.0-flash',
+        model: GEMINI_MODEL,
         tokens: response.usageMetadata?.totalTokenCount,
       },
     }
