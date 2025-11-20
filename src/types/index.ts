@@ -78,6 +78,7 @@ export interface GenerateParams {
   category: Category | ''
   difficulty: Difficulty
   count: number
+  keyword?: string
 }
 
 export interface UIState {

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useId, useState } from 'react'
 import type { GenerateParams } from '@/types'
 import CategorySelector from './CategorySelector'
 import DifficultySelector from './DifficultySelector'
@@ -14,9 +14,11 @@ export default function ControlPanel({
   onGenerate,
   isLoading,
 }: ControlPanelProps) {
+  const keywordInputId = useId()
   const [category, setCategory] = useState<GenerateParams['category']>('')
   const [difficulty, setDifficulty] =
     useState<GenerateParams['difficulty']>('easy')
+  const [keyword, setKeyword] = useState('')
 
   const handleGenerate = () => {
     onGenerate({
@@ -24,6 +26,7 @@ export default function ControlPanel({
       category,
       difficulty,
       count: 5, // 固定で5個
+      keyword: keyword.trim() || undefined,
     })
   }
 
@@ -63,6 +66,26 @@ export default function ControlPanel({
           selectedDifficulty={difficulty}
           onDifficultyChange={setDifficulty}
         />
+
+        <div className="space-y-2">
+          <label
+            htmlFor={keywordInputId}
+            className="block font-medium text-gray-700 text-sm"
+          >
+            キーワード（任意）
+          </label>
+          <input
+            id={keywordInputId}
+            type="text"
+            value={keyword}
+            onChange={(e) => setKeyword(e.target.value)}
+            placeholder="例: 猫、宇宙、夏休み"
+            className="w-full rounded-lg border border-gray-300 px-4 py-2 transition-colors focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
+          />
+          <p className="text-gray-500 text-xs">
+            キーワードを指定すると、そのテーマに沿ったお題が生成されます
+          </p>
+        </div>
 
         <button
           type="button"
