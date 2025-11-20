@@ -131,9 +131,9 @@ export function buildPrompt({
     prompt += `\n\n【難易度設定】\n${DIFFICULTY_PROMPTS[difficulty]}`
   }
 
-  // カスタムプロンプトが指定されている場合
+  // カスタムプロンプト（キーワード）が指定されている場合
   if (customPrompt) {
-    prompt += `\n\n【追加要望】\n${customPrompt}`
+    prompt += `\n\n【キーワード指定】\n以下のキーワードやテーマを含めた、またはそれに関連するお題を作成してください：「${customPrompt}」`
   }
 
   // 生成数を指定

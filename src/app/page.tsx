@@ -29,6 +29,7 @@ export default function Home() {
           category: params.category || undefined,
           difficulty: params.difficulty,
           count: params.count,
+          customPrompt: params.keyword,
         }),
       })
 
