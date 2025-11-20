@@ -7,7 +7,7 @@
   },
   "files": {
     "ignoreUnknown": true,
-    "includes": ["**", "!**/node_modules/**", "!**/.next/**", "!**/.vscode"]
+    "includes": ["**", "!**/node_modules", "!**/.next", "!**/.vscode"]
   },
   "formatter": {
     "enabled": true,
