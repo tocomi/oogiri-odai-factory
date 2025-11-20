@@ -44,7 +44,7 @@ export default function OdaiCard({
     return (
       <div className="animate-pulse rounded-lg bg-white shadow-md">
         <div className="flex items-center gap-4 p-4 lg:p-6">
-          <div className="flex-shrink-0">
+          <div className="shrink-0">
             <div className="h-12 w-12 rounded-full bg-gray-200"></div>
           </div>
           <div className="min-w-0 flex-1 space-y-2">
@@ -52,7 +52,7 @@ export default function OdaiCard({
             <div className="h-4 w-3/4 rounded bg-gray-200"></div>
             <div className="h-3 w-1/2 rounded bg-gray-200"></div>
           </div>
-          <div className="flex flex-shrink-0 items-center gap-2">
+          <div className="flex shrink-0 items-center gap-2">
             <div className="h-8 w-16 rounded bg-gray-200"></div>
             <div className="h-8 w-8 rounded bg-gray-200"></div>
           </div>
@@ -65,9 +65,9 @@ export default function OdaiCard({
     <div className="card-hover animate-fade-in-up rounded-lg bg-white shadow-md transition-shadow duration-200 hover:shadow-lg">
       <div className="flex items-center gap-4 p-4 lg:p-6">
         {/* AI識別アイコン */}
-        <div className="flex-shrink-0">
+        <div className="shrink-0">
           <div
-            className={`flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-r font-bold text-sm text-white ${getSourceColor(source)}`}
+            className={`flex h-12 w-12 items-center justify-center rounded-full bg-linear-to-r font-bold text-sm text-white ${getSourceColor(source)}`}
           >
             {source === 'openai' ? 'GPT' : source === 'claude' ? 'CL' : 'GM'}
           </div>
@@ -81,7 +81,7 @@ export default function OdaiCard({
         </div>
 
         {/* アクションボタン */}
-        <div className="flex flex-shrink-0 items-center gap-2">
+        <div className="flex shrink-0 items-center gap-2">
           <button
             type="button"
             onClick={handleCopy}

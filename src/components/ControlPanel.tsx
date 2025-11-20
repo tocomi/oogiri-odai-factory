@@ -30,7 +30,7 @@ export default function ControlPanel({
   return (
     <div className="space-y-6 rounded-lg bg-white p-6 shadow-md">
       <div className="space-y-6">
-        <div className="rounded-lg border border-gray-200 bg-gradient-to-r from-blue-50 via-purple-50 to-orange-50 p-4">
+        <div className="rounded-lg border border-gray-200 bg-linear-to-r from-blue-50 via-purple-50 to-orange-50 p-4">
           <div className="mb-2 flex items-center justify-center gap-4">
             <div className="flex items-center gap-2">
               <div className="h-3 w-3 rounded-full bg-blue-500"></div>
@@ -68,7 +68,7 @@ export default function ControlPanel({
           type="button"
           onClick={handleGenerate}
           disabled={isLoading}
-          className="flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-purple-500 to-purple-600 px-6 py-4 font-semibold text-white transition-all duration-200 hover:from-purple-600 hover:to-purple-700 disabled:from-gray-400 disabled:to-gray-500"
+          className="flex w-full items-center justify-center gap-2 rounded-lg bg-linear-to-r from-purple-500 to-purple-600 px-6 py-4 font-semibold text-white transition-all duration-200 hover:from-purple-600 hover:to-purple-700 disabled:from-gray-400 disabled:to-gray-500"
         >
           {isLoading ? (
             <>
