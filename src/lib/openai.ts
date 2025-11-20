@@ -28,15 +28,15 @@ export async function generateOdaiWithOpenAI(
     })
 
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: 'gpt-5.1-2025-11-13',
       messages: [
         {
           role: 'system',
           content: prompt,
         },
       ],
-      max_tokens: 1000,
-      temperature: 0.8,
+      max_completion_tokens: 1000,
+      temperature: 1,
     })
 
     const content = completion.choices[0]?.message?.content
