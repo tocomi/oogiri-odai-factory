@@ -2,7 +2,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai'
 import type { Category, Difficulty, OdaiResponse } from '@/types'
 import { buildPrompt, parseOdaiResponse } from './prompts'
 
-const GEMINI_MODEL = 'gemini-1.5-flash-latest'
+const GEMINI_MODEL = 'gemini-1.5-flash'
 
 export async function generateOdaiWithGemini(
   category?: Category,
