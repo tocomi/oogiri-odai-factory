@@ -1,8 +1,8 @@
-import { GoogleGenerativeAI } from '@google/generative-ai'
+import { GoogleGenAI } from '@google/genai'
 import type { Category, Difficulty, OdaiResponse } from '@/types'
 import { buildPrompt, parseOdaiResponse } from './prompts'
 
-const GEMINI_MODEL = 'gemini-1.5-flash-latest'
+const GEMINI_MODEL = 'gemini-2.0-flash'
 
 export async function generateOdaiWithGemini(
   category?: Category,
@@ -20,15 +20,7 @@ export async function generateOdaiWithGemini(
       }
     }
 
-    const genAI = new GoogleGenerativeAI(apiKey)
-
-    const model = genAI.getGenerativeModel({
-      model: GEMINI_MODEL,
-      generationConfig: {
-        temperature: 0.8,
-        maxOutputTokens: 1000,
-      },
-    })
+    const ai = new GoogleGenAI({ apiKey })
 
     const prompt = buildPrompt({
       category,
@@ -37,9 +29,10 @@ export async function generateOdaiWithGemini(
       customPrompt,
     })
 
-    const result = await model.generateContent(prompt)
-    const response = await result.response
-    const content = response.text()
+    const { text: content, usageMetadata } = await ai.models.generateContent({
+      model: GEMINI_MODEL,
+      contents: prompt,
+    })
 
     if (!content) {
       return {
@@ -63,7 +56,7 @@ export async function generateOdaiWithGemini(
         odais,
         source: 'gemini',
         model: GEMINI_MODEL,
-        tokens: response.usageMetadata?.totalTokenCount,
+        tokens: usageMetadata?.totalTokenCount,
       },
     }
   } catch (error) {
