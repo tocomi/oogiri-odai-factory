@@ -28,7 +28,7 @@ export async function generateOdaiWithClaude(
     })
 
     const message = await anthropic.messages.create({
-      model: 'claude-3-7-sonnet-latest',
+      model: 'claude-sonnet-4-5-20250929',
       max_tokens: 1000,
       temperature: 0.8,
       messages: [
