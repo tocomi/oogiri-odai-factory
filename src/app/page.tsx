@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import ControlPanel from '@/components/ControlPanel'
 import ResultsArea from '@/components/ResultsArea'
-import type { AIProvider, GenerateParams, OdaiItem, UIState } from '@/types'
+import type { GenerateParams, UIState } from '@/types'
 
 export default function Home() {
   const [state, setState] = useState<UIState>({
@@ -13,7 +13,6 @@ export default function Home() {
       claude: [],
       gemini: [],
     },
-    favorites: [],
     error: null,
   })
 
@@ -70,34 +69,6 @@ export default function Home() {
     console.log('Copied:', text)
   }
 
-  const handleFavorite = (odai: string, source: AIProvider) => {
-    const existingIndex = state.favorites.findIndex(
-      (fav) => fav.text === odai && fav.source === source,
-    )
-
-    if (existingIndex >= 0) {
-      // お気に入りから削除
-      setState((prev) => ({
-        ...prev,
-        favorites: prev.favorites.filter((_, i) => i !== existingIndex),
-      }))
-    } else {
-      // お気に入りに追加
-      const newFavorite: OdaiItem = {
-        id: Date.now().toString(),
-        text: odai,
-        source,
-        createdAt: new Date(),
-        isFavorite: true,
-      }
-
-      setState((prev) => ({
-        ...prev,
-        favorites: [...prev.favorites, newFavorite],
-      }))
-    }
-  }
-
   return (
     <main className="min-h-screen p-4">
       <div className="mx-auto max-w-7xl space-y-8">
@@ -147,9 +118,7 @@ export default function Home() {
             <ResultsArea
               results={state.results}
               isLoading={state.isLoading}
-              favorites={state.favorites}
               onCopy={handleCopy}
-              onFavorite={handleFavorite}
             />
           </div>
         </div>

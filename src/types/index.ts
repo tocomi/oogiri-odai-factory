@@ -63,16 +63,6 @@ export interface GenerateAllResponse {
   }
 }
 
-export interface OdaiItem {
-  id: string
-  text: string
-  source: AIProvider
-  category?: Category
-  difficulty?: Difficulty
-  createdAt: Date
-  isFavorite: boolean
-}
-
 export interface GenerateParams {
   selectedAIs: AIProvider[]
   category: Category | ''
@@ -88,7 +78,6 @@ export interface UIState {
     claude: string[]
     gemini: string[]
   }
-  favorites: OdaiItem[]
   error: string | null
 }
 

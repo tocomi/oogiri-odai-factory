@@ -1,6 +1,5 @@
 'use client'
 
-import type { AIProvider, OdaiItem } from '@/types'
 import OdaiCard from './OdaiCard'
 
 interface ResultsAreaProps {
@@ -10,22 +9,14 @@ interface ResultsAreaProps {
     gemini: string[]
   }
   isLoading: boolean
-  favorites: OdaiItem[]
   onCopy: (text: string) => void
-  onFavorite: (odai: string, source: AIProvider) => void
 }
 
 export default function ResultsArea({
   results,
   isLoading,
-  favorites,
   onCopy,
-  onFavorite,
 }: ResultsAreaProps) {
-  const isFavorite = (odai: string, source: AIProvider) => {
-    return favorites.some((fav) => fav.text === odai && fav.source === source)
-  }
-
   const renderAllCards = () => {
     // ローディング中の表示
     if (isLoading) {
@@ -37,8 +28,6 @@ export default function ResultsArea({
             odai=""
             source="openai"
             onCopy={() => {}}
-            onFavorite={() => {}}
-            isFavorite={false}
             isLoading={true}
           />
         )),
@@ -49,8 +38,6 @@ export default function ResultsArea({
             odai=""
             source="claude"
             onCopy={() => {}}
-            onFavorite={() => {}}
-            isFavorite={false}
             isLoading={true}
           />
         )),
@@ -61,8 +48,6 @@ export default function ResultsArea({
             odai=""
             source="gemini"
             onCopy={() => {}}
-            onFavorite={() => {}}
-            isFavorite={false}
             isLoading={true}
           />
         )),
@@ -77,8 +62,6 @@ export default function ResultsArea({
           odai={odai}
           source="openai"
           onCopy={() => onCopy(odai)}
-          onFavorite={() => onFavorite(odai, 'openai')}
-          isFavorite={isFavorite(odai, 'openai')}
         />
       )),
       ...results.claude.map((odai) => (
@@ -87,8 +70,6 @@ export default function ResultsArea({
           odai={odai}
           source="claude"
           onCopy={() => onCopy(odai)}
-          onFavorite={() => onFavorite(odai, 'claude')}
-          isFavorite={isFavorite(odai, 'claude')}
         />
       )),
       ...results.gemini.map((odai) => (
@@ -97,8 +78,6 @@ export default function ResultsArea({
           odai={odai}
           source="gemini"
           onCopy={() => onCopy(odai)}
-          onFavorite={() => onFavorite(odai, 'gemini')}
-          isFavorite={isFavorite(odai, 'gemini')}
         />
       )),
     ]
