@@ -25,6 +25,7 @@ export async function generateOdaiWithOpenAI(
       difficulty,
       count,
       customPrompt,
+      aiProvider: 'openai',
     })
 
     const completion = await openai.chat.completions.create({

@@ -27,11 +27,15 @@ export async function generateOdaiWithGemini(
       difficulty,
       count,
       customPrompt,
+      aiProvider: 'gemini',
     })
 
     const { text: content, usageMetadata } = await ai.models.generateContent({
       model: GEMINI_MODEL,
       contents: prompt,
+      config: {
+        temperature: 1.0,
+      },
     })
 
     if (!content) {
