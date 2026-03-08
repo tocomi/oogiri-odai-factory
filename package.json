@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "check": "biome check --write",
-    "check-types": "tsgo --noEmit --diagnostics"
+    "check-types": "tsgo --noEmit --diagnostics",
+    "eval": "promptfoo eval --config promptfoo/promptfooconfig.yaml",
+    "eval:view": "promptfoo view"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.70.0",
@@ -25,6 +27,7 @@
     "@types/react": "^19.2.6",
     "@types/react-dom": "^19.2.3",
     "@typescript/native-preview": "7.0.0-dev.20251119.1",
+    "promptfoo": "^0.120.27",
     "tailwindcss": "^4.1.17",
     "typescript": "5.9.3"
   },
