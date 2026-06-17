@@ -2,7 +2,7 @@ import { GoogleGenAI } from '@google/genai'
 import type { Category, Difficulty, OdaiResponse } from '@/types'
 import { buildPrompt, parseOdaiResponse } from './prompts'
 
-const GEMINI_MODEL = 'gemini-2.0-flash'
+const GEMINI_MODEL = 'gemini-3.1-flash-lite'
 
 export async function generateOdaiWithGemini(
   category?: Category,
@@ -81,6 +81,17 @@ export async function generateOdaiWithGemini(
         return {
           success: false,
           error: 'Invalid API key',
+        }
+      }
+
+      if (
+        error.message.includes('NOT_FOUND') ||
+        error.message.includes('no longer available')
+      ) {
+        return {
+          success: false,
+          error:
+            'Gemini model is not available. Update GEMINI_MODEL in src/lib/gemini.ts.',
         }
       }
 

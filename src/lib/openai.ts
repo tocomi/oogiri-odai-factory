@@ -6,6 +6,8 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 })
 
+const OPENAI_MODEL = 'gpt-5.4-mini'
+
 export async function generateOdaiWithOpenAI(
   category?: Category,
   difficulty?: Difficulty,
@@ -29,7 +31,7 @@ export async function generateOdaiWithOpenAI(
     })
 
     const completion = await openai.chat.completions.create({
-      model: 'gpt-5.1-2025-11-13',
+      model: OPENAI_MODEL,
       messages: [
         {
           role: 'system',

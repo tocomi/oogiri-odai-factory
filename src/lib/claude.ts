@@ -6,6 +6,8 @@ const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 })
 
+const CLAUDE_MODEL = 'claude-sonnet-4-6'
+
 export async function generateOdaiWithClaude(
   category?: Category,
   difficulty?: Difficulty,
@@ -29,7 +31,7 @@ export async function generateOdaiWithClaude(
     })
 
     const message = await anthropic.messages.create({
-      model: 'claude-sonnet-4-5-20250929',
+      model: CLAUDE_MODEL,
       max_tokens: 1000,
       temperature: 1.0,
       messages: [
