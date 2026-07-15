@@ -6,7 +6,7 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 })
 
-const OPENAI_MODEL = 'gpt-5.4-mini'
+const OPENAI_MODEL = 'gpt-5.6-luna'
 
 export async function generateOdaiWithOpenAI(
   category?: Category,

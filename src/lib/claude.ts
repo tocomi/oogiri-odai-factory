@@ -6,7 +6,7 @@ const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 })
 
-const CLAUDE_MODEL = 'claude-sonnet-4-6'
+const CLAUDE_MODEL = 'claude-sonnet-5'
 
 export async function generateOdaiWithClaude(
   category?: Category,
@@ -33,7 +33,9 @@ export async function generateOdaiWithClaude(
     const message = await anthropic.messages.create({
       model: CLAUDE_MODEL,
       max_tokens: 1000,
-      temperature: 1.0,
+      // Sonnet 5 は thinking 省略時に adaptive thinking が有効になり
+      // max_tokens を消費するため、従来挙動を維持する目的で無効化
+      thinking: { type: 'disabled' },
       messages: [
         {
           role: 'user',
