@@ -1,5 +1,36 @@
 export type AIProvider = 'openai' | 'claude' | 'gemini'
 
+export interface GeneratedOdai {
+  id: string
+  text: string
+  source: AIProvider
+  technique?: string
+}
+
+export type FeedbackType = 'like' | 'dislike' | 'copy' | 'skip'
+
+export const DISLIKE_REASONS = [
+  { id: 'too_long', label: '長すぎる' },
+  { id: 'cliche', label: 'ありきたり' },
+  { id: 'confusing', label: '意味不明' },
+  { id: 'narrow', label: '答えの幅が狭い' },
+  { id: 'weak_setup', label: '設定が弱い' },
+] as const
+
+export type DislikeReason = (typeof DISLIKE_REASONS)[number]['id']
+
+export interface FeedbackRequest {
+  odaiId: string
+  type: FeedbackType
+  reasonTag?: DislikeReason
+}
+
+export interface FeedbackResponse {
+  success: boolean
+  eventId?: number
+  error?: string
+}
+
 export type Difficulty = 'easy' | 'medium' | 'hard'
 
 export type Category =
@@ -33,7 +64,7 @@ export interface OdaiRequest {
 export interface OdaiResponse {
   success: boolean
   data?: {
-    odais: string[]
+    odais: GeneratedOdai[]
     source: AIProvider
     model: string
     tokens?: number
@@ -51,9 +82,9 @@ export interface GenerateAllRequest {
 export interface GenerateAllResponse {
   success: boolean
   data: {
-    openai: string[]
-    claude: string[]
-    gemini: string[]
+    openai: GeneratedOdai[]
+    claude: GeneratedOdai[]
+    gemini: GeneratedOdai[]
     totalCount: number
   }
   errors: {
@@ -74,9 +105,9 @@ export interface GenerateParams {
 export interface UIState {
   isLoading: boolean
   results: {
-    openai: string[]
-    claude: string[]
-    gemini: string[]
+    openai: GeneratedOdai[]
+    claude: GeneratedOdai[]
+    gemini: GeneratedOdai[]
   }
   error: string | null
 }

@@ -1,12 +1,13 @@
 'use client'
 
+import type { GeneratedOdai } from '@/types'
 import OdaiCard from './OdaiCard'
 
 interface ResultsAreaProps {
   results: {
-    openai: string[]
-    claude: string[]
-    gemini: string[]
+    openai: GeneratedOdai[]
+    claude: GeneratedOdai[]
+    gemini: GeneratedOdai[]
   }
   isLoading: boolean
   onCopy: (text: string) => void
@@ -25,7 +26,6 @@ export default function ResultsArea({
           <OdaiCard
             // biome-ignore lint/suspicious/noArrayIndexKey: no problem
             key={`loading-openai-${i}`}
-            odai=""
             source="openai"
             onCopy={() => {}}
             isLoading={true}
@@ -35,7 +35,6 @@ export default function ResultsArea({
           <OdaiCard
             // biome-ignore lint/suspicious/noArrayIndexKey: no problem
             key={`loading-claude-${i}`}
-            odai=""
             source="claude"
             onCopy={() => {}}
             isLoading={true}
@@ -45,7 +44,6 @@ export default function ResultsArea({
           <OdaiCard
             // biome-ignore lint/suspicious/noArrayIndexKey: no problem
             key={`loading-gemini-${i}`}
-            odai=""
             source="gemini"
             onCopy={() => {}}
             isLoading={true}
@@ -58,26 +56,26 @@ export default function ResultsArea({
     const allCards = [
       ...results.openai.map((odai) => (
         <OdaiCard
-          key={`openai-${odai}`}
+          key={odai.id}
           odai={odai}
           source="openai"
-          onCopy={() => onCopy(odai)}
+          onCopy={() => onCopy(odai.text)}
         />
       )),
       ...results.claude.map((odai) => (
         <OdaiCard
-          key={`claude-${odai}`}
+          key={odai.id}
           odai={odai}
           source="claude"
-          onCopy={() => onCopy(odai)}
+          onCopy={() => onCopy(odai.text)}
         />
       )),
       ...results.gemini.map((odai) => (
         <OdaiCard
-          key={`gemini-${odai}`}
+          key={odai.id}
           odai={odai}
           source="gemini"
-          onCopy={() => onCopy(odai)}
+          onCopy={() => onCopy(odai.text)}
         />
       )),
     ]

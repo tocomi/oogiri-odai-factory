@@ -1,5 +1,6 @@
 import { GoogleGenAI } from '@google/genai'
 import type { Category, Difficulty, OdaiResponse } from '@/types'
+import { persistGeneratedOdais } from './db'
 import { buildPrompt, parseOdaiResponse } from './prompts'
 
 const GEMINI_MODEL = 'gemini-3.1-flash-lite'
@@ -22,7 +23,7 @@ export async function generateOdaiWithGemini(
 
     const ai = new GoogleGenAI({ apiKey })
 
-    const prompt = buildPrompt({
+    const { prompt, offeredTechniques } = buildPrompt({
       category,
       difficulty,
       count,
@@ -45,14 +46,24 @@ export async function generateOdaiWithGemini(
       }
     }
 
-    const odais = parseOdaiResponse(content)
+    const parsed = parseOdaiResponse(content)
 
-    if (odais.length === 0) {
+    if (parsed.length === 0) {
       return {
         success: false,
         error: 'Failed to parse Gemini response',
       }
     }
+
+    const odais = persistGeneratedOdais({
+      parsed,
+      provider: 'gemini',
+      model: GEMINI_MODEL,
+      category,
+      difficulty,
+      keyword: customPrompt,
+      offeredTechniques,
+    })
 
     return {
       success: true,

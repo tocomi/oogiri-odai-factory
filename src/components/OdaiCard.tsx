@@ -1,13 +1,21 @@
 'use client'
 
 import { useState } from 'react'
-import type { AIProvider } from '@/types'
+import type { AIProvider, FeedbackType, GeneratedOdai } from '@/types'
 
 interface OdaiCardProps {
-  odai: string
+  odai?: GeneratedOdai
   source: AIProvider
   onCopy: () => void
   isLoading?: boolean
+}
+
+function sendFeedback(odaiId: string, type: FeedbackType) {
+  fetch('/api/feedback', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ odaiId, type }),
+  }).catch(() => {})
 }
 
 export default function OdaiCard({
@@ -17,12 +25,21 @@ export default function OdaiCard({
   isLoading = false,
 }: OdaiCardProps) {
   const [showCopied, setShowCopied] = useState(false)
+  const [rated, setRated] = useState<'like' | 'dislike' | null>(null)
 
   const handleCopy = async () => {
-    await navigator.clipboard.writeText(odai)
+    if (!odai) return
+    await navigator.clipboard.writeText(odai.text)
+    sendFeedback(odai.id, 'copy')
     onCopy()
     setShowCopied(true)
     setTimeout(() => setShowCopied(false), 2000)
+  }
+
+  const handleRate = (type: 'like' | 'dislike') => {
+    if (!odai || rated === type) return
+    sendFeedback(odai.id, type)
+    setRated(type)
   }
 
   const getSourceBgColor = (source: AIProvider) => {
@@ -58,7 +75,7 @@ export default function OdaiCard({
     }
   }
 
-  if (isLoading) {
+  if (isLoading || !odai) {
     return (
       <div className="animate-pulse rounded-lg bg-gray-50 shadow-md">
         <div className="flex items-center gap-4 p-4 lg:p-6">
@@ -83,12 +100,36 @@ export default function OdaiCard({
         {/* お題テキスト */}
         <div className="min-w-0 flex-1">
           <p className="text-base text-gray-800 leading-relaxed lg:text-lg">
-            {odai}
+            {odai.text}
           </p>
         </div>
 
         {/* アクションボタン */}
         <div className="flex shrink-0 items-center gap-2">
+          <button
+            type="button"
+            onClick={() => handleRate('like')}
+            className={`rounded-md p-1.5 transition-colors duration-150 ${
+              rated === 'like'
+                ? 'bg-green-100'
+                : 'bg-white/60 opacity-60 hover:bg-white/90 hover:opacity-100'
+            }`}
+            aria-label="いいね"
+          >
+            👍
+          </button>
+          <button
+            type="button"
+            onClick={() => handleRate('dislike')}
+            className={`rounded-md p-1.5 transition-colors duration-150 ${
+              rated === 'dislike'
+                ? 'bg-red-100'
+                : 'bg-white/60 opacity-60 hover:bg-white/90 hover:opacity-100'
+            }`}
+            aria-label="よくない"
+          >
+            👎
+          </button>
           <button
             type="button"
             onClick={handleCopy}
