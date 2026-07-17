@@ -18,22 +18,52 @@ const RETRY_MAX_DELAY_MS = 30_000
 
 const PROVIDERS: AIProvider[] = ['openai', 'claude', 'gemini']
 const DIFFICULTIES: Difficulty[] = ['easy', 'medium', 'hard']
+// 取り消せる評価の履歴数
+const MAX_HISTORY = 20
 
-function postFeedback(odaiId: string, type: FeedbackType) {
-  fetch('/api/feedback', {
+// 記録した eventId を返す（取り消し時の削除に使う）。失敗時は null
+function postFeedback(
+  odaiId: string,
+  type: FeedbackType,
+): Promise<number | null> {
+  return fetch('/api/feedback', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ odaiId, type }),
-  }).catch(() => {})
+  })
+    .then((res) => res.json())
+    .then((json) => (typeof json?.eventId === 'number' ? json.eventId : null))
+    .catch(() => null)
+}
+
+function undoFeedback(eventIdPromise: Promise<number | null>) {
+  eventIdPromise
+    .then((eventId) => {
+      if (eventId === null) return
+      return fetch('/api/feedback', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ eventId }),
+      })
+    })
+    .catch(() => {})
+}
+
+type RatedEntry = {
+  odai: GeneratedOdai
+  type: FeedbackType
+  eventIdPromise: Promise<number | null>
 }
 
 // お題キューの補充・再試行・評価の確定を一手に引き受けるフック。
 // - 補充失敗時はバックオフ付きで自動再試行する
 // - rate() は「いま表示中の先頭」に対して一度だけ確定する（連打・キーリピート対策）
+// - undo() は直近の評価を取り消してお題をキュー先頭に戻す
 export function useRatingQueue({ active }: { active: boolean }) {
   const [queue, setQueue] = useState<GeneratedOdai[]>([])
   const [error, setError] = useState<string | null>(null)
   const [retryNonce, setRetryNonce] = useState(0)
+  const [history, setHistory] = useState<RatedEntry[]>([])
 
   const fetchingRef = useRef(false)
   const providerIndexRef = useRef(Math.floor(Math.random() * PROVIDERS.length))
@@ -117,12 +147,33 @@ export function useRatingQueue({ active }: { active: boolean }) {
       if (!odai || ratedHeadRef.current === odai.id) return null
 
       ratedHeadRef.current = odai.id
-      postFeedback(odai.id, type)
+      const eventIdPromise = postFeedback(odai.id, type)
+      setHistory((h) => [
+        ...h.slice(-(MAX_HISTORY - 1)),
+        { odai, type, eventIdPromise },
+      ])
       setQueue((q) => (q[0]?.id === odai.id ? q.slice(1) : q))
       return odai
     },
     [queue],
   )
+
+  // 直近の評価を取り消す。お題をキュー先頭に戻し、サーバーの記録も削除する。
+  // 取り消した評価の内容を返し、履歴が空なら null を返す
+  const undo = useCallback((): {
+    odai: GeneratedOdai
+    type: FeedbackType
+  } | null => {
+    const entry = history[history.length - 1]
+    if (!entry) return null
+
+    setHistory((h) => h.slice(0, -1))
+    // 戻したお題を再評価できるようにする
+    ratedHeadRef.current = null
+    setQueue((q) => [entry.odai, ...q])
+    undoFeedback(entry.eventIdPromise)
+    return { odai: entry.odai, type: entry.type }
+  }, [history])
 
   // コピーはキューを進めない。表示中のお題に copy イベントだけ記録する
   const recordCopy = useCallback(() => {
@@ -131,5 +182,5 @@ export function useRatingQueue({ active }: { active: boolean }) {
     }
   }, [current])
 
-  return { current, error, rate, recordCopy }
+  return { current, error, rate, undo, canUndo: history.length > 0, recordCopy }
 }

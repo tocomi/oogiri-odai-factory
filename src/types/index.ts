@@ -14,6 +14,10 @@ export interface FeedbackRequest {
   type: FeedbackType
 }
 
+export interface FeedbackDeleteRequest {
+  eventId: number
+}
+
 export interface FeedbackResponse {
   success: boolean
   eventId?: number

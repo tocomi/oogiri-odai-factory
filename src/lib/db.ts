@@ -207,3 +207,14 @@ export async function recordFeedback(
   })
   return Number(result.lastInsertRowid)
 }
+
+// ユーザーが評価を取り消したときに該当イベントを削除する。
+// 取り消されたイベントを残すと like/dislike の集計が実際の評価とずれるため、
+// 論理削除ではなく物理削除にしている。
+export async function deleteFeedback(eventId: number): Promise<void> {
+  await ensureSchema()
+  await getClient().execute({
+    sql: 'DELETE FROM feedback_events WHERE id = ?',
+    args: [eventId],
+  })
+}
