@@ -1,5 +1,9 @@
 import type { AIProvider, Category, Difficulty } from '@/types'
 
+// プロンプトを変更したら必ずバンプする。
+// お題ごとに記録され、プロンプト改善の前後で評価を比較するために使う。
+export const PROMPT_VERSION = '2026-07-16.1'
+
 interface Technique {
   name: string
   description: string
@@ -62,7 +66,11 @@ const TECHNIQUES: Technique[] = [
 ]
 
 function pickRandom<T>(arr: T[], n: number): T[] {
-  const shuffled = [...arr].sort(() => Math.random() - 0.5)
+  const shuffled = [...arr]
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+  }
   return shuffled.slice(0, n)
 }
 
@@ -141,6 +149,10 @@ export const DIFFICULTY_PROMPTS = {
   hard: '高度な発想力や創造性が必要な、上級者向けのお題にしてください。複雑な設定や制約があり、独創的なアイデアが求められるお題にしてください。',
 } as const
 
+export interface BuiltPrompt {
+  prompt: string
+}
+
 export function buildPrompt({
   category,
   difficulty,
@@ -153,7 +165,7 @@ export function buildPrompt({
   count: number
   customPrompt?: string
   aiProvider: AIProvider
-}): string {
+}): BuiltPrompt {
   // 9つのテクニックからランダムに4つ選択
   const selectedTechniques = pickRandom(TECHNIQUES, 4)
   const techniquesSection = buildTechniquesSection(selectedTechniques)
@@ -196,7 +208,9 @@ ${techniquesSection}
 8. ありきたりなパターンは避け、意外性のある切り口を重視する
 
 出力形式:
-お題のみを改行区切りで出力してください。番号や説明は不要です。
+以下の形式のJSON配列のみを出力してください。コードブロック記法や前後の説明は不要です。
+[{"odai": "お題の本文", "technique": "実際に使ったテクニック名"}]
+"technique" には上記テクニックのうち、そのお題で実際に使ったものの名前を正確に入れてください。
 `
 
   // AI別のプロンプトを追加
@@ -220,12 +234,55 @@ ${techniquesSection}
   // 生成数を指定
   prompt += `\n\n${count}個のお題を生成してください。`
 
-  return prompt
+  return { prompt }
 }
 
-export function parseOdaiResponse(response: string): string[] {
-  // 改行で分割し、空行や番号付きの行を処理
-  const lines = response
+export interface ParsedOdai {
+  text: string
+  technique?: string
+}
+
+export function parseOdaiResponse(response: string): ParsedOdai[] {
+  const parsed = parseJsonResponse(response)
+  if (parsed.length > 0) {
+    return parsed
+  }
+  return parseLinesResponse(response)
+}
+
+function parseJsonResponse(response: string): ParsedOdai[] {
+  const start = response.indexOf('[')
+  const end = response.lastIndexOf(']')
+  if (start === -1 || end === -1 || end <= start) {
+    return []
+  }
+
+  try {
+    const items: unknown = JSON.parse(response.slice(start, end + 1))
+    if (!Array.isArray(items)) {
+      return []
+    }
+    return items
+      .filter(
+        (item): item is { odai: string; technique?: string } =>
+          typeof item === 'object' &&
+          item !== null &&
+          typeof (item as { odai?: unknown }).odai === 'string',
+      )
+      .map((item) => ({
+        text: item.odai.trim(),
+        technique:
+          typeof item.technique === 'string' ? item.technique : undefined,
+      }))
+      .filter((item) => item.text.length > 0 && item.text.length <= 200)
+  } catch {
+    return []
+  }
+}
+
+// JSONで返ってこなかった場合のフォールバック（テクニック帰属なし）
+function parseLinesResponse(response: string): ParsedOdai[] {
+  return response
     .split('\n')
     .map((line) => line.trim())
     .filter((line) => line.length > 0)
@@ -237,7 +294,6 @@ export function parseOdaiResponse(response: string): string[] {
         .replace(/^[\d]+\s*/, '')
         .trim()
     })
-    .filter((line) => line.length > 0 && line.length <= 200) // 空行と長すぎる行を除外
-
-  return lines
+    .filter((line) => line.length > 0 && line.length <= 200)
+    .map((text) => ({ text }))
 }

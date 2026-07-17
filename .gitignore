@@ -37,6 +37,12 @@ yarn-error.log*
 # vercel
 .vercel
 
+# local sqlite (お題・評価データ)
+/data/
+
+# claude code (個人ローカル設定)
+.claude/settings.local.json
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

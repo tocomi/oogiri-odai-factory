@@ -1,5 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk'
 import type { Category, Difficulty, OdaiResponse } from '@/types'
+import { persistGeneratedOdais } from './db'
 import { buildPrompt, parseOdaiResponse } from './prompts'
 
 const anthropic = new Anthropic({
@@ -22,7 +23,7 @@ export async function generateOdaiWithClaude(
       }
     }
 
-    const prompt = buildPrompt({
+    const { prompt } = buildPrompt({
       category,
       difficulty,
       count,
@@ -32,7 +33,7 @@ export async function generateOdaiWithClaude(
 
     const message = await anthropic.messages.create({
       model: CLAUDE_MODEL,
-      max_tokens: 1000,
+      max_tokens: 2000,
       // Sonnet 5 は thinking 省略時に adaptive thinking が有効になり
       // max_tokens を消費するため、従来挙動を維持する目的で無効化
       thinking: { type: 'disabled' },
@@ -52,14 +53,27 @@ export async function generateOdaiWithClaude(
       }
     }
 
-    const odais = parseOdaiResponse(content.text)
+    const parsed = parseOdaiResponse(content.text)
 
-    if (odais.length === 0) {
+    if (parsed.length === 0) {
       return {
         success: false,
         error: 'Failed to parse Claude response',
       }
     }
+
+    const tokens = message.usage?.input_tokens + message.usage?.output_tokens
+
+    const odais = await persistGeneratedOdais({
+      parsed,
+      provider: 'claude',
+      model: message.model,
+      category,
+      difficulty,
+      keyword: customPrompt,
+      promptText: prompt,
+      tokens,
+    })
 
     return {
       success: true,
@@ -67,7 +81,7 @@ export async function generateOdaiWithClaude(
         odais,
         source: 'claude',
         model: message.model,
-        tokens: message.usage?.input_tokens + message.usage?.output_tokens,
+        tokens,
       },
     }
   } catch (error) {

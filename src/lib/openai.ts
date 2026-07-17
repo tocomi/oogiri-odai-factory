@@ -1,5 +1,6 @@
 import OpenAI from 'openai'
 import type { Category, Difficulty, OdaiResponse } from '@/types'
+import { persistGeneratedOdais } from './db'
 import { buildPrompt, parseOdaiResponse } from './prompts'
 
 const openai = new OpenAI({
@@ -22,7 +23,7 @@ export async function generateOdaiWithOpenAI(
       }
     }
 
-    const prompt = buildPrompt({
+    const { prompt } = buildPrompt({
       category,
       difficulty,
       count,
@@ -38,7 +39,7 @@ export async function generateOdaiWithOpenAI(
           content: prompt,
         },
       ],
-      max_completion_tokens: 1000,
+      max_completion_tokens: 2000,
       temperature: 1,
     })
 
@@ -50,14 +51,25 @@ export async function generateOdaiWithOpenAI(
       }
     }
 
-    const odais = parseOdaiResponse(content)
+    const parsed = parseOdaiResponse(content)
 
-    if (odais.length === 0) {
+    if (parsed.length === 0) {
       return {
         success: false,
         error: 'Failed to parse OpenAI response',
       }
     }
+
+    const odais = await persistGeneratedOdais({
+      parsed,
+      provider: 'openai',
+      model: completion.model,
+      category,
+      difficulty,
+      keyword: customPrompt,
+      promptText: prompt,
+      tokens: completion.usage?.total_tokens,
+    })
 
     return {
       success: true,
