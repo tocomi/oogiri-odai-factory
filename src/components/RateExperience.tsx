@@ -9,7 +9,6 @@ const LIKED_ODAIS_STORAGE_KEY = 'oogiri-liked-odais'
 export default function RateExperience() {
   const [likedOdais, setLikedOdais] = useState<GeneratedOdai[]>([])
   const [view, setView] = useState<'rate' | 'liked'>('rate')
-  const [flash, setFlash] = useState<'like' | 'dislike' | null>(null)
   const [showCopied, setShowCopied] = useState(false)
 
   const { current, error, rate, recordCopy } = useRatingQueue({
@@ -56,11 +55,6 @@ export default function RateExperience() {
 
       if (type === 'like') {
         saveLikedOdai(odai)
-      }
-
-      if (type === 'like' || type === 'dislike') {
-        setFlash(type)
-        setTimeout(() => setFlash(null), 180)
       }
 
       setShowCopied(false)
@@ -190,13 +184,7 @@ export default function RateExperience() {
               {current ? (
                 <div
                   key={current.id}
-                  className={`relative w-full rounded-2xl p-6 pb-10 shadow-lg transition-colors duration-150 sm:p-10 sm:pb-12 ${
-                    flash === 'like'
-                      ? 'bg-green-100'
-                      : flash === 'dislike'
-                        ? 'bg-red-100'
-                        : 'bg-white'
-                  }`}
+                  className="relative w-full rounded-2xl bg-white p-6 pb-10 shadow-lg sm:p-10 sm:pb-12"
                 >
                   <p className="text-balance text-center text-gray-900 text-xl leading-relaxed sm:text-2xl lg:text-3xl">
                     {current.text}
@@ -219,30 +207,32 @@ export default function RateExperience() {
             </div>
 
             {/* 評価ボタン */}
-            <div className="flex items-center justify-center gap-2 pb-6 sm:gap-4 sm:pb-5">
-              <button
-                type="button"
-                onClick={() => handleRate('dislike')}
-                disabled={!current}
-                className="whitespace-nowrap rounded-full bg-red-50 px-6 py-3 font-bold text-red-500 transition-colors hover:bg-red-100 disabled:opacity-40 sm:px-8"
-              >
-                👎 なし
-              </button>
+            <div className="flex flex-col items-center gap-3 pb-6 sm:pb-5">
+              <div className="flex items-center justify-center gap-8 sm:gap-14">
+                <button
+                  type="button"
+                  onClick={() => handleRate('dislike')}
+                  disabled={!current}
+                  className="whitespace-nowrap rounded-full bg-red-50 px-8 py-3 font-bold text-red-500 transition-colors hover:bg-red-100 disabled:opacity-40 sm:px-10"
+                >
+                  👎 なし
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleRate('like')}
+                  disabled={!current}
+                  className="whitespace-nowrap rounded-full bg-green-50 px-8 py-3 font-bold text-green-600 transition-colors hover:bg-green-100 disabled:opacity-40 sm:px-10"
+                >
+                  👍 あり
+                </button>
+              </div>
               <button
                 type="button"
                 onClick={() => handleRate('skip')}
                 disabled={!current}
-                className="whitespace-nowrap rounded-full bg-gray-50 px-4 py-3 text-gray-500 transition-colors hover:bg-gray-100 disabled:opacity-40 sm:px-6"
+                className="whitespace-nowrap rounded-full bg-gray-50 px-4 py-1.5 text-gray-500 text-sm transition-colors hover:bg-gray-100 disabled:opacity-40"
               >
                 ⏭ スキップ
-              </button>
-              <button
-                type="button"
-                onClick={() => handleRate('like')}
-                disabled={!current}
-                className="whitespace-nowrap rounded-full bg-green-50 px-6 py-3 font-bold text-green-600 transition-colors hover:bg-green-100 disabled:opacity-40 sm:px-8"
-              >
-                👍 あり
               </button>
             </div>
 
