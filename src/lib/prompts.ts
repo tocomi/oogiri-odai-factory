@@ -151,8 +151,6 @@ export const DIFFICULTY_PROMPTS = {
 
 export interface BuiltPrompt {
   prompt: string
-  // プロンプトに含めたテクニック名。お題と一緒に記録して評価分析に使う
-  offeredTechniques: string[]
 }
 
 export function buildPrompt({
@@ -236,10 +234,7 @@ ${techniquesSection}
   // 生成数を指定
   prompt += `\n\n${count}個のお題を生成してください。`
 
-  return {
-    prompt,
-    offeredTechniques: selectedTechniques.map((t) => t.name),
-  }
+  return { prompt }
 }
 
 export interface ParsedOdai {

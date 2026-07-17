@@ -1,43 +1,20 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState } from 'react'
-import type {
-  AIProvider,
-  Category,
-  Difficulty,
-  FeedbackType,
-  GeneratedOdai,
-} from '@/types'
-import { CATEGORIES } from '@/types'
+import { useCallback, useEffect, useState } from 'react'
+import { useRatingQueue } from '@/hooks/useRatingQueue'
+import type { FeedbackType, GeneratedOdai } from '@/types'
 
-const BATCH_COUNT = 8
-// キューがこれを下回ったら裏で次バッチを生成する
-const REFILL_THRESHOLD = 6
 const LIKED_ODAIS_STORAGE_KEY = 'oogiri-liked-odais'
 
-const PROVIDERS: AIProvider[] = ['openai', 'claude', 'gemini']
-const DIFFICULTIES: Difficulty[] = ['easy', 'medium', 'hard']
-
-function postFeedback(odaiId: string, type: FeedbackType) {
-  fetch('/api/feedback', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ odaiId, type }),
-  }).catch(() => {})
-}
-
 export default function RateExperience() {
-  const [queue, setQueue] = useState<GeneratedOdai[]>([])
   const [likedOdais, setLikedOdais] = useState<GeneratedOdai[]>([])
   const [view, setView] = useState<'rate' | 'liked'>('rate')
-  const [error, setError] = useState<string | null>(null)
   const [flash, setFlash] = useState<'like' | 'dislike' | null>(null)
   const [showCopied, setShowCopied] = useState(false)
 
-  const fetchingRef = useRef(false)
-  const providerIndexRef = useRef(Math.floor(Math.random() * PROVIDERS.length))
-
-  const current = queue[0]
+  const { current, error, rate, recordCopy } = useRatingQueue({
+    active: view === 'rate',
+  })
 
   useEffect(() => {
     try {
@@ -72,54 +49,10 @@ export default function RateExperience() {
     })
   }, [])
 
-  const refill = useCallback(async () => {
-    if (fetchingRef.current) return
-    fetchingRef.current = true
-    setError(null)
-
-    // プロバイダはラウンドロビン、カテゴリ・難易度はランダムに散らして
-    // データに偏りが出ないようにする
-    const provider = PROVIDERS[providerIndexRef.current % PROVIDERS.length]
-    providerIndexRef.current++
-
-    const category: Category | undefined =
-      Math.random() < 0.25
-        ? undefined
-        : CATEGORIES[Math.floor(Math.random() * CATEGORIES.length)].id
-    const difficulty =
-      DIFFICULTIES[Math.floor(Math.random() * DIFFICULTIES.length)]
-
-    try {
-      const res = await fetch(`/api/${provider}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ category, difficulty, count: BATCH_COUNT }),
-      })
-      const json = await res.json()
-      if (json.success && json.data?.odais?.length) {
-        setQueue((q) => [...q, ...json.data.odais])
-      } else {
-        setError('生成に失敗しました（次のバッチで再試行します）')
-      }
-    } catch {
-      setError('ネットワークエラー（次のバッチで再試行します）')
-    } finally {
-      fetchingRef.current = false
-    }
-  }, [])
-
-  useEffect(() => {
-    if (view === 'rate' && queue.length < REFILL_THRESHOLD) {
-      refill()
-    }
-  }, [queue.length, refill, view])
-
-  const advance = useCallback(
+  const handleRate = useCallback(
     (type: FeedbackType) => {
-      const odai = queue[0]
+      const odai = rate(type)
       if (!odai) return
-
-      postFeedback(odai.id, type)
 
       if (type === 'like') {
         saveLikedOdai(odai)
@@ -131,39 +64,39 @@ export default function RateExperience() {
       }
 
       setShowCopied(false)
-      setQueue((q) => q.slice(1))
     },
-    [queue, saveLikedOdai],
+    [rate, saveLikedOdai],
   )
 
   const copyCurrent = useCallback(() => {
-    const odai = queue[0]
-    if (!odai) return
-    navigator.clipboard.writeText(odai.text)
-    postFeedback(odai.id, 'copy')
+    if (!current) return
+    navigator.clipboard.writeText(current.text)
+    recordCopy()
     setShowCopied(true)
     setTimeout(() => setShowCopied(false), 2000)
-  }, [queue])
+  }, [current, recordCopy])
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (view !== 'rate' || e.metaKey || e.ctrlKey || e.altKey) return
+      if (view !== 'rate' || e.repeat || e.metaKey || e.ctrlKey || e.altKey) {
+        return
+      }
 
       switch (e.key) {
         case 'ArrowRight':
         case 'j':
           e.preventDefault()
-          advance('like')
+          handleRate('like')
           break
         case 'ArrowLeft':
         case 'f':
           e.preventDefault()
-          advance('dislike')
+          handleRate('dislike')
           break
         case 'ArrowDown':
         case ' ':
           e.preventDefault()
-          advance('skip')
+          handleRate('skip')
           break
         case 'c':
           e.preventDefault()
@@ -173,7 +106,7 @@ export default function RateExperience() {
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
-  }, [advance, copyCurrent, view])
+  }, [handleRate, copyCurrent, view])
 
   return (
     <main className="flex h-dvh flex-col overflow-hidden p-4">
@@ -289,7 +222,7 @@ export default function RateExperience() {
             <div className="flex items-center justify-center gap-2 pb-6 sm:gap-4 sm:pb-5">
               <button
                 type="button"
-                onClick={() => advance('dislike')}
+                onClick={() => handleRate('dislike')}
                 disabled={!current}
                 className="whitespace-nowrap rounded-full bg-red-50 px-6 py-3 font-bold text-red-500 transition-colors hover:bg-red-100 disabled:opacity-40 sm:px-8"
               >
@@ -297,7 +230,7 @@ export default function RateExperience() {
               </button>
               <button
                 type="button"
-                onClick={() => advance('skip')}
+                onClick={() => handleRate('skip')}
                 disabled={!current}
                 className="whitespace-nowrap rounded-full bg-gray-50 px-4 py-3 text-gray-500 transition-colors hover:bg-gray-100 disabled:opacity-40 sm:px-6"
               >
@@ -305,7 +238,7 @@ export default function RateExperience() {
               </button>
               <button
                 type="button"
-                onClick={() => advance('like')}
+                onClick={() => handleRate('like')}
                 disabled={!current}
                 className="whitespace-nowrap rounded-full bg-green-50 px-6 py-3 font-bold text-green-600 transition-colors hover:bg-green-100 disabled:opacity-40 sm:px-8"
               >

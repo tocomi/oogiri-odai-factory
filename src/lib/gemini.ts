@@ -23,7 +23,7 @@ export async function generateOdaiWithGemini(
 
     const ai = new GoogleGenAI({ apiKey })
 
-    const { prompt, offeredTechniques } = buildPrompt({
+    const { prompt } = buildPrompt({
       category,
       difficulty,
       count,
@@ -55,14 +55,15 @@ export async function generateOdaiWithGemini(
       }
     }
 
-    const odais = persistGeneratedOdais({
+    const odais = await persistGeneratedOdais({
       parsed,
       provider: 'gemini',
       model: GEMINI_MODEL,
       category,
       difficulty,
       keyword: customPrompt,
-      offeredTechniques,
+      promptText: prompt,
+      tokens: usageMetadata?.totalTokenCount,
     })
 
     return {

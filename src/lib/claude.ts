@@ -23,7 +23,7 @@ export async function generateOdaiWithClaude(
       }
     }
 
-    const { prompt, offeredTechniques } = buildPrompt({
+    const { prompt } = buildPrompt({
       category,
       difficulty,
       count,
@@ -62,14 +62,17 @@ export async function generateOdaiWithClaude(
       }
     }
 
-    const odais = persistGeneratedOdais({
+    const tokens = message.usage?.input_tokens + message.usage?.output_tokens
+
+    const odais = await persistGeneratedOdais({
       parsed,
       provider: 'claude',
       model: message.model,
       category,
       difficulty,
       keyword: customPrompt,
-      offeredTechniques,
+      promptText: prompt,
+      tokens,
     })
 
     return {
@@ -78,7 +81,7 @@ export async function generateOdaiWithClaude(
         odais,
         source: 'claude',
         model: message.model,
-        tokens: message.usage?.input_tokens + message.usage?.output_tokens,
+        tokens,
       },
     }
   } catch (error) {

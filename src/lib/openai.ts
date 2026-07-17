@@ -23,7 +23,7 @@ export async function generateOdaiWithOpenAI(
       }
     }
 
-    const { prompt, offeredTechniques } = buildPrompt({
+    const { prompt } = buildPrompt({
       category,
       difficulty,
       count,
@@ -60,14 +60,15 @@ export async function generateOdaiWithOpenAI(
       }
     }
 
-    const odais = persistGeneratedOdais({
+    const odais = await persistGeneratedOdais({
       parsed,
       provider: 'openai',
       model: completion.model,
       category,
       difficulty,
       keyword: customPrompt,
-      offeredTechniques,
+      promptText: prompt,
+      tokens: completion.usage?.total_tokens,
     })
 
     return {

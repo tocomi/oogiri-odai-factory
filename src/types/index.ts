@@ -9,20 +9,9 @@ export interface GeneratedOdai {
 
 export type FeedbackType = 'like' | 'dislike' | 'copy' | 'skip'
 
-export const DISLIKE_REASONS = [
-  { id: 'too_long', label: '長すぎる' },
-  { id: 'cliche', label: 'ありきたり' },
-  { id: 'confusing', label: '意味不明' },
-  { id: 'narrow', label: '答えの幅が狭い' },
-  { id: 'weak_setup', label: '設定が弱い' },
-] as const
-
-export type DislikeReason = (typeof DISLIKE_REASONS)[number]['id']
-
 export interface FeedbackRequest {
   odaiId: string
   type: FeedbackType
-  reasonTag?: DislikeReason
 }
 
 export interface FeedbackResponse {
@@ -70,46 +59,6 @@ export interface OdaiResponse {
     tokens?: number
   }
   error?: string
-}
-
-export interface GenerateAllRequest {
-  category?: Category
-  difficulty?: Difficulty
-  count: number
-  customPrompt?: string
-}
-
-export interface GenerateAllResponse {
-  success: boolean
-  data: {
-    openai: GeneratedOdai[]
-    claude: GeneratedOdai[]
-    gemini: GeneratedOdai[]
-    totalCount: number
-  }
-  errors: {
-    openai?: string
-    claude?: string
-    gemini?: string
-  }
-}
-
-export interface GenerateParams {
-  selectedAIs: AIProvider[]
-  category: Category | ''
-  difficulty: Difficulty
-  count: number
-  keyword?: string
-}
-
-export interface UIState {
-  isLoading: boolean
-  results: {
-    openai: GeneratedOdai[]
-    claude: GeneratedOdai[]
-    gemini: GeneratedOdai[]
-  }
-  error: string | null
 }
 
 export const CATEGORIES: CategoryInfo[] = [
@@ -186,39 +135,3 @@ export const CATEGORIES: CategoryInfo[] = [
     icon: '👨‍👩‍👧‍👦',
   },
 ]
-
-export const DIFFICULTY_INFO = {
-  easy: {
-    name: '初心者向け',
-    description: 'シンプルで答えやすいお題',
-    color: 'green',
-  },
-  medium: {
-    name: '中級者向け',
-    description: '少し考える必要があるお題',
-    color: 'yellow',
-  },
-  hard: {
-    name: '上級者向け',
-    description: '高度な発想力が必要なお題',
-    color: 'red',
-  },
-} as const
-
-export const AI_INFO = {
-  openai: {
-    name: 'OpenAI GPT',
-    description: '論理的で構造化されたお題',
-    color: 'blue',
-  },
-  claude: {
-    name: 'Claude',
-    description: '創造的でユーモア溢れるお題',
-    color: 'purple',
-  },
-  gemini: {
-    name: 'Gemini',
-    description: 'トレンドを反映したお題',
-    color: 'orange',
-  },
-} as const
