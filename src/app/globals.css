@@ -1,49 +1,28 @@
 @import "tailwindcss";
 
-/* カスタムスライダーのスタイル */
-.slider::-webkit-slider-thumb {
-  appearance: none;
-  height: 20px;
-  width: 20px;
-  border-radius: 50%;
-  background: #8b5cf6;
-  cursor: pointer;
-  border: 2px solid #ffffff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+@theme {
+  /* 紙と墨、審査の朱（○）と紺（✕） */
+  --color-paper: #f1f0ec;
+  --color-card: #ffffff;
+  --color-line: #e3e1da;
+  --color-ink: #24221e;
+  --color-muted: #8a867c;
+  --color-shu: #c2452f;
+  --color-shu-deep: #a93a26;
+  --color-kon: #2e5a88;
+  --color-kon-deep: #254b74;
+
+  --font-mincho:
+    var(--font-shippori), "Hiragino Mincho ProN", "Yu Mincho", serif;
+  --font-gothic:
+    var(--font-zen), "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
 }
 
-.slider::-webkit-slider-track {
-  width: 100%;
-  height: 8px;
-  cursor: pointer;
-  background: #e5e7eb;
-  border-radius: 4px;
-}
-
-.slider::-moz-range-thumb {
-  height: 20px;
-  width: 20px;
-  border-radius: 50%;
-  background: #8b5cf6;
-  cursor: pointer;
-  border: 2px solid #ffffff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.slider::-moz-range-track {
-  width: 100%;
-  height: 8px;
-  cursor: pointer;
-  background: #e5e7eb;
-  border-radius: 4px;
-  border: none;
-}
-
-/* アニメーション */
-@keyframes fadeInUp {
+/* お題カードの登場 */
+@keyframes card-in {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(10px);
   }
   to {
     opacity: 1;
@@ -51,37 +30,77 @@
   }
 }
 
-.animate-fade-in-up {
-  animation: fadeInUp 0.5s ease-out;
+.animate-card-in {
+  animation: card-in 0.25s ease-out;
 }
 
-/* カードホバーエフェクト */
-.card-hover {
-  transition:
-    transform 0.2s ease-in-out,
-    box-shadow 0.2s ease-in-out;
+@media (prefers-reduced-motion: reduce) {
+  .animate-card-in {
+    animation: none;
+  }
 }
 
-.card-hover:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+/* 評価時のカード退場（あり=右へ、なし=左へ） */
+@keyframes card-out-like {
+  to {
+    opacity: 0;
+    transform: translateX(90px) rotate(3deg);
+  }
 }
 
-/* スクロールバーのカスタマイズ */
+@keyframes card-out-dislike {
+  to {
+    opacity: 0;
+    transform: translateX(-90px) rotate(-3deg);
+  }
+}
+
+@keyframes card-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+.animate-card-out-like {
+  animation: card-out-like 0.4s cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+
+.animate-card-out-dislike {
+  animation: card-out-dislike 0.4s cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-card-out-like,
+  .animate-card-out-dislike {
+    animation: card-fade-out 0.2s ease-out forwards;
+  }
+}
+
+/* キーボードショートカット表記 */
+kbd {
+  display: inline-block;
+  min-width: 1.4em;
+  border: 1px solid var(--color-line);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  background: var(--color-card);
+  padding: 0 0.35em;
+  font-family: inherit;
+  font-size: 0.85em;
+  line-height: 1.5;
+  text-align: center;
+}
+
+/* スクロールバー */
 ::-webkit-scrollbar {
   width: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f5f9;
-  border-radius: 3px;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: #d4d2ca;
   border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
 }
