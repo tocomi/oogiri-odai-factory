@@ -1,5 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk'
-import type { Category, Difficulty, OdaiResponse } from '@/types'
+import type { Category, OdaiResponse } from '@/types'
 import { persistGeneratedOdais } from './db'
 import { buildPrompt, parseOdaiResponse } from './prompts'
 
@@ -11,7 +11,6 @@ const CLAUDE_MODEL = 'claude-sonnet-5'
 
 export async function generateOdaiWithClaude(
   category?: Category,
-  difficulty?: Difficulty,
   count: number = 5,
   customPrompt?: string,
 ): Promise<OdaiResponse> {
@@ -23,12 +22,10 @@ export async function generateOdaiWithClaude(
       }
     }
 
-    const { prompt } = buildPrompt({
+    const { prompt, techniqueVariant, presentedTechniques } = buildPrompt({
       category,
-      difficulty,
       count,
       customPrompt,
-      aiProvider: 'claude',
     })
 
     const message = await anthropic.messages.create({
@@ -69,9 +66,10 @@ export async function generateOdaiWithClaude(
       provider: 'claude',
       model: message.model,
       category,
-      difficulty,
       keyword: customPrompt,
       promptText: prompt,
+      techniqueVariant,
+      presentedTechniques,
       tokens,
     })
 

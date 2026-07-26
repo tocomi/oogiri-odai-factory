@@ -1,5 +1,5 @@
 import OpenAI from 'openai'
-import type { Category, Difficulty, OdaiResponse } from '@/types'
+import type { Category, OdaiResponse } from '@/types'
 import { persistGeneratedOdais } from './db'
 import { buildPrompt, parseOdaiResponse } from './prompts'
 
@@ -11,7 +11,6 @@ const OPENAI_MODEL = 'gpt-5.6-luna'
 
 export async function generateOdaiWithOpenAI(
   category?: Category,
-  difficulty?: Difficulty,
   count: number = 5,
   customPrompt?: string,
 ): Promise<OdaiResponse> {
@@ -23,19 +22,20 @@ export async function generateOdaiWithOpenAI(
       }
     }
 
-    const { prompt } = buildPrompt({
+    const { prompt, techniqueVariant, presentedTechniques } = buildPrompt({
       category,
-      difficulty,
       count,
       customPrompt,
-      aiProvider: 'openai',
     })
 
     const completion = await openai.chat.completions.create({
       model: OPENAI_MODEL,
+      // Claude / Gemini と同じく単一の user ターンとして渡す。
+      // system に入れるとモデルの追従度が変わり、provider 間の評価差に
+      // 「モデルの差」と「注入層の差」が混ざってしまう
       messages: [
         {
-          role: 'system',
+          role: 'user',
           content: prompt,
         },
       ],
@@ -65,9 +65,10 @@ export async function generateOdaiWithOpenAI(
       provider: 'openai',
       model: completion.model,
       category,
-      difficulty,
       keyword: customPrompt,
       promptText: prompt,
+      techniqueVariant,
+      presentedTechniques,
       tokens: completion.usage?.total_tokens,
     })
 

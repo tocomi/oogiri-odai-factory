@@ -24,8 +24,6 @@ export interface FeedbackResponse {
   error?: string
 }
 
-export type Difficulty = 'easy' | 'medium' | 'hard'
-
 export type Category =
   | 'daily' // 日常生活
   | 'situation' // シチュエーション
@@ -49,7 +47,6 @@ export interface CategoryInfo {
 
 export interface OdaiRequest {
   category?: Category
-  difficulty?: Difficulty
   count: number
   customPrompt?: string
 }
