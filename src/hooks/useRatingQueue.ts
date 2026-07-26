@@ -1,23 +1,17 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
-import type {
-  AIProvider,
-  Category,
-  Difficulty,
-  FeedbackType,
-  GeneratedOdai,
-} from '@/types'
+import type { AIProvider, Category, FeedbackType, GeneratedOdai } from '@/types'
 import { CATEGORIES } from '@/types'
 
-const BATCH_COUNT = 8
-// キューがこれを下回ったら裏で次バッチを生成する
+const BATCH_COUNT = 4
+// キューがこれを下回ったら裏で次バッチを生成する。
+// BATCH_COUNT より大きいので、キューが空に近い状態からは補充が2回連続で走る
 const REFILL_THRESHOLD = 6
 const RETRY_BASE_DELAY_MS = 2_000
 const RETRY_MAX_DELAY_MS = 30_000
 
 const PROVIDERS: AIProvider[] = ['openai', 'claude', 'gemini']
-const DIFFICULTIES: Difficulty[] = ['easy', 'medium', 'hard']
 // 取り消せる評価の履歴数
 const MAX_HISTORY = 20
 
@@ -89,7 +83,7 @@ export function useRatingQueue({ active }: { active: boolean }) {
     if (fetchingRef.current) return
     fetchingRef.current = true
 
-    // プロバイダはラウンドロビン、カテゴリ・難易度はランダムに散らして
+    // プロバイダはラウンドロビン、カテゴリはランダムに散らして
     // データに偏りが出ないようにする
     const provider = PROVIDERS[providerIndexRef.current % PROVIDERS.length]
     providerIndexRef.current++
@@ -98,14 +92,12 @@ export function useRatingQueue({ active }: { active: boolean }) {
       Math.random() < 0.25
         ? undefined
         : CATEGORIES[Math.floor(Math.random() * CATEGORIES.length)].id
-    const difficulty =
-      DIFFICULTIES[Math.floor(Math.random() * DIFFICULTIES.length)]
 
     try {
       const res = await fetch(`/api/${provider}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ category, difficulty, count: BATCH_COUNT }),
+        body: JSON.stringify({ category, count: BATCH_COUNT }),
       })
       const json = await res.json()
       if (json.success && json.data?.odais?.length) {

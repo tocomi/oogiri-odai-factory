@@ -6,7 +6,7 @@ export async function POST(request: NextRequest) {
   try {
     const body: OdaiRequest = await request.json()
 
-    const { category, difficulty, count = 5, customPrompt } = body
+    const { category, count = 5, customPrompt } = body
 
     // バリデーション
     if (count < 1 || count > 10) {
@@ -16,12 +16,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const result = await generateOdaiWithClaude(
-      category,
-      difficulty,
-      count,
-      customPrompt,
-    )
+    const result = await generateOdaiWithClaude(category, count, customPrompt)
 
     if (!result.success) {
       const statusCode =

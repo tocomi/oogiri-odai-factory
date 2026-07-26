@@ -1,13 +1,7 @@
 import { randomUUID } from 'node:crypto'
 import { mkdirSync } from 'node:fs'
 import { type Client, createClient, type Transaction } from '@libsql/client'
-import type {
-  AIProvider,
-  Category,
-  Difficulty,
-  FeedbackType,
-  GeneratedOdai,
-} from '@/types'
+import type { AIProvider, Category, FeedbackType, GeneratedOdai } from '@/types'
 import type { ParsedOdai } from './prompts'
 import { PROMPT_VERSION } from './prompts'
 
@@ -104,6 +98,35 @@ const MIGRATIONS: Migration[] = [
       'CREATE INDEX IF NOT EXISTS idx_feedback_odai_id ON feedback_events(odai_id)',
     )
   },
+  // v2: テクニック提示バリアントのA/Bテスト。
+  // A/B軸は technique 1本だけなので、汎用のスロット表ではなく直接カラムで持つ。
+  // 独立したスロットが複数必要になった時点で、別テーブルへ切り出す。
+  // 適用前の generations は NULL になるので、集計時は WHERE で除外する。
+  async (tx) => {
+    if (!(await tableHasColumn(tx, 'generations', 'technique_variant'))) {
+      await tx.execute(
+        'ALTER TABLE generations ADD COLUMN technique_variant TEXT',
+      )
+    }
+    await tx.execute(
+      'CREATE INDEX IF NOT EXISTS idx_generations_technique_variant ON generations(technique_variant)',
+    )
+  },
+  // v3: プロンプトに提示したテクニックの記録。
+  // 9個からランダムに提示しているため、odais.used_technique（AIの自己申告）だけでは
+  // 「使われなかった」のか「そもそも提示されていない」のかが区別できない。
+  // position は提示順。先頭に置いたテクニックが選ばれやすい偏りを検出するために持つ。
+  async (tx) => {
+    await tx.execute(`CREATE TABLE IF NOT EXISTS generation_techniques (
+      generation_id TEXT NOT NULL REFERENCES generations(id),
+      technique TEXT NOT NULL,
+      position INTEGER NOT NULL,
+      PRIMARY KEY (generation_id, technique)
+    )`)
+    await tx.execute(
+      'CREATE INDEX IF NOT EXISTS idx_generation_techniques_technique ON generation_techniques(technique)',
+    )
+  },
 ]
 
 async function migrate(c: Client): Promise<void> {
@@ -153,25 +176,37 @@ export async function persistGeneratedOdais(params: {
   provider: AIProvider
   model: string
   category?: Category
-  difficulty?: Difficulty
   keyword?: string
   promptText: string
+  techniqueVariant: string
+  presentedTechniques: string[]
   tokens?: number
 }): Promise<GeneratedOdai[]> {
   const generationId = randomUUID()
-  const odais = params.parsed.map((p) => ({
-    id: randomUUID(),
-    text: p.text,
-    source: params.provider,
-    technique: p.technique,
-  }))
+
+  // used_technique はモデルの自己申告なので、そのまま保存すると
+  // 提示していない手法や実在しない手法が分析対象に混入する
+  // （technique バリアントが none のときは presented が空なので全て落ちる）。
+  // 提示した集合に完全一致するものだけを残し、それ以外は「帰属なし」として NULL にする。
+  const presented = new Set(params.presentedTechniques)
+  const odais = params.parsed.map((p) => {
+    const claimed = p.technique?.trim()
+    return {
+      id: randomUUID(),
+      text: p.text,
+      source: params.provider,
+      technique: claimed && presented.has(claimed) ? claimed : undefined,
+    }
+  })
 
   await ensureSchema()
   await getClient().batch(
     [
       {
+        // difficulty カラムは廃止後も残してある。過去データの分析用で、
+        // 新しい行では常に NULL になる（prompt_version で前後を区別できる）
         sql: `INSERT INTO generations
-          (id, provider, model, prompt_version, category, difficulty, keyword, prompt_text, tokens)
+          (id, provider, model, prompt_version, category, keyword, prompt_text, technique_variant, tokens)
           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         args: [
           generationId,
@@ -179,15 +214,19 @@ export async function persistGeneratedOdais(params: {
           params.model,
           PROMPT_VERSION,
           params.category ?? null,
-          params.difficulty ?? null,
           params.keyword ?? null,
           params.promptText,
+          params.techniqueVariant,
           params.tokens ?? null,
         ],
       },
       ...odais.map((o) => ({
         sql: 'INSERT INTO odais (id, generation_id, text, used_technique) VALUES (?, ?, ?, ?)',
         args: [o.id, generationId, o.text, o.technique ?? null],
+      })),
+      ...params.presentedTechniques.map((technique, position) => ({
+        sql: 'INSERT INTO generation_techniques (generation_id, technique, position) VALUES (?, ?, ?)',
+        args: [generationId, technique, position],
       })),
     ],
     'write',
