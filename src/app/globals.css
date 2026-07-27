@@ -1,56 +1,88 @@
 @import "tailwindcss";
 
 @theme {
-  /* 紙と墨、審査の朱（○）と紺（✕） */
-  --color-paper: #f1f0ec;
-  --color-card: #ffffff;
-  --color-line: #e3e1da;
-  --color-ink: #24221e;
-  --color-muted: #8a867c;
-  --color-shu: #c2452f;
-  --color-shu-deep: #a93a26;
-  --color-kon: #2e5a88;
-  --color-kon-deep: #254b74;
+  /* 決裁の色：台紙の黄、申請書の紙、罫と影の黒、可の朱、否の青 */
+  --color-daishi: #ffd23f;
+  --color-card: #fffdf7;
+  --color-ink: #14100c;
+  --color-ka: #ff4f81;
+  --color-hi: #29c3ff;
 
-  /* OS 標準の明朝／ゴシックを使う（Web フォントは読み込まない） */
-  --font-mincho: "Hiragino Mincho ProN", "Yu Mincho", YuMincho, serif;
-  --font-gothic: "Hiragino Kaku Gothic ProN", "Yu Gothic", YuGothic, sans-serif;
+  /* OS 標準のゴシックを使う（Web フォントは読み込まない）。
+     判子案は極太で組むので、W8 まで持つヒラギノ角ゴシックを先頭に置く */
+  --font-gothic:
+    "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
 }
 
-/* お題カードの登場 */
+/* 台紙の下敷き。ヘッダーとカードは自前の背景で覆い、書類だけを浮かせる */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.14;
+  background: repeating-linear-gradient(
+    -45deg,
+    var(--color-ink) 0 2px,
+    transparent 2px 13px
+  );
+}
+
+/* 申請書が回ってくる */
 @keyframes card-in {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(-14px) rotate(-1.5deg);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) rotate(0);
   }
 }
 
 .animate-card-in {
-  animation: card-in 0.25s ease-out;
+  animation: card-in 0.22s ease-out;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .animate-card-in {
-    animation: none;
+/* 印が押される（勢いよく着地させるので戻りを付ける） */
+@keyframes stamp-in {
+  from {
+    opacity: 0;
+    transform: rotate(-13deg) scale(2.4);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(-13deg) scale(1);
   }
 }
 
-/* 評価時のカード退場（あり=右へ、なし=左へ） */
+.animate-stamp-in {
+  animation: stamp-in 0.18s cubic-bezier(0.2, 1.5, 0.4, 1) both;
+}
+
+/* 決裁済みの書類が捌かれる（可=右へ、否=左へ）。
+   押印を見せてから飛ばすので、退場は少し遅らせて始める。
+   紙が透けると厚みが嘘になるので、消えるのは飛びきる最後だけにする */
 @keyframes card-out-like {
+  0%,
+  92% {
+    opacity: 1;
+  }
   to {
     opacity: 0;
-    transform: translateX(90px) rotate(3deg);
+    transform: translateX(420px) rotate(8deg);
   }
 }
 
 @keyframes card-out-dislike {
+  0%,
+  92% {
+    opacity: 1;
+  }
   to {
     opacity: 0;
-    transform: translateX(-90px) rotate(-3deg);
+    transform: translateX(-420px) rotate(-8deg);
   }
 }
 
@@ -61,14 +93,22 @@
 }
 
 .animate-card-out-like {
-  animation: card-out-like 0.4s cubic-bezier(0.4, 0, 1, 1) forwards;
+  animation: card-out-like 0.4s cubic-bezier(0.4, 0, 1, 1) 0.16s forwards;
 }
 
 .animate-card-out-dislike {
-  animation: card-out-dislike 0.4s cubic-bezier(0.4, 0, 1, 1) forwards;
+  animation: card-out-dislike 0.4s cubic-bezier(0.4, 0, 1, 1) 0.16s forwards;
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .animate-card-in {
+    animation: none;
+  }
+
+  .animate-stamp-in {
+    animation: none;
+  }
+
   .animate-card-out-like,
   .animate-card-out-dislike {
     animation: card-fade-out 0.2s ease-out forwards;
@@ -79,20 +119,18 @@
 kbd {
   display: inline-block;
   min-width: 1.4em;
-  border: 1px solid var(--color-line);
-  border-bottom-width: 2px;
-  border-radius: 4px;
-  background: var(--color-card);
-  padding: 0 0.35em;
+  border: 2px solid color-mix(in srgb, var(--color-ink) 55%, transparent);
+  padding: 0 0.3em;
   font-family: inherit;
-  font-size: 0.85em;
+  font-size: 0.9em;
+  font-weight: 800;
   line-height: 1.5;
   text-align: center;
 }
 
 /* スクロールバー */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 8px;
 }
 
 ::-webkit-scrollbar-track {
@@ -100,6 +138,5 @@ kbd {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #d4d2ca;
-  border-radius: 3px;
+  background: var(--color-ink);
 }
