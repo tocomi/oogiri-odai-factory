@@ -12,10 +12,9 @@
   --color-kon: #2e5a88;
   --color-kon-deep: #254b74;
 
-  --font-mincho:
-    var(--font-shippori), "Hiragino Mincho ProN", "Yu Mincho", serif;
-  --font-gothic:
-    var(--font-zen), "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+  /* OS 標準の明朝／ゴシックを使う（Web フォントは読み込まない） */
+  --font-mincho: "Hiragino Mincho ProN", "Yu Mincho", YuMincho, serif;
+  --font-gothic: "Hiragino Kaku Gothic ProN", "Yu Gothic", YuGothic, sans-serif;
 }
 
 /* お題カードの登場 */

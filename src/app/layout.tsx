@@ -1,21 +1,6 @@
 import type { Metadata } from 'next'
-import { Shippori_Mincho_B1, Zen_Kaku_Gothic_New } from 'next/font/google'
 import './globals.css'
 import { Analytics } from '@vercel/analytics/next'
-
-const shipporiMincho = Shippori_Mincho_B1({
-  weight: ['500', '700'],
-  subsets: ['latin'],
-  variable: '--font-shippori',
-  display: 'swap',
-})
-
-const zenKakuGothic = Zen_Kaku_Gothic_New({
-  weight: ['400', '500', '700'],
-  subsets: ['latin'],
-  variable: '--font-zen',
-  display: 'swap',
-})
 
 export const metadata: Metadata = {
   title: '大喜利ネタ工場',
@@ -30,9 +15,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ja">
-      <body
-        className={`${shipporiMincho.variable} ${zenKakuGothic.variable} min-h-dvh bg-paper font-gothic text-ink antialiased`}
-      >
+      <body className="min-h-dvh bg-paper font-gothic text-ink antialiased">
         {children}
         <Analytics />
       </body>
