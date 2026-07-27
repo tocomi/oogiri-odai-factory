@@ -5,17 +5,23 @@ import type { AIProvider, Category, FeedbackType, GeneratedOdai } from '@/types'
 import { CATEGORIES } from '@/types'
 
 const BATCH_COUNT = 4
-// キューがこれを下回ったら裏で次バッチを生成する。
-// BATCH_COUNT より大きいので、キューが空に近い状態からは補充が2回連続で走る
+/**
+ * キューがこれを下回ったら裏で次バッチを生成する。
+ * {@link BATCH_COUNT} より大きいので、キューが空に近い状態からは補充が2回連続で走る。
+ */
 const REFILL_THRESHOLD = 6
 const RETRY_BASE_DELAY_MS = 2_000
 const RETRY_MAX_DELAY_MS = 30_000
 
 const PROVIDERS: AIProvider[] = ['openai', 'claude', 'gemini']
-// 取り消せる評価の履歴数
+/** 取り消せる評価の履歴数 */
 const MAX_HISTORY = 20
 
-// 記録した eventId を返す（取り消し時の削除に使う）。失敗時は null
+/**
+ * 評価をサーバーに記録する。
+ *
+ * @returns 記録した eventId（取り消し時の削除に使う）。失敗時は null
+ */
 function postFeedback(
   odaiId: string,
   type: FeedbackType,
@@ -30,6 +36,10 @@ function postFeedback(
     .catch(() => null)
 }
 
+/**
+ * 記録済みの評価を削除する。
+ * eventId が確定する前に取り消される場合があるので、Promise のまま受け取る
+ */
 function undoFeedback(eventIdPromise: Promise<number | null>) {
   eventIdPromise
     .then((eventId) => {
@@ -49,10 +59,16 @@ type RatedEntry = {
   eventIdPromise: Promise<number | null>
 }
 
-// お題キューの補充・再試行・評価の確定を一手に引き受けるフック。
-// - 補充失敗時はバックオフ付きで自動再試行する
-// - rate() は「いま表示中の先頭」に対して一度だけ確定する（連打・キーリピート対策）
-// - undo() は直近の評価を取り消してお題をキュー先頭に戻す
+/**
+ * お題キューの補充・再試行・評価の確定を一手に引き受けるフック。
+ *
+ * - 補充失敗時はバックオフ付きで自動再試行する
+ * - `rate()` は「いま表示中の先頭」に対して一度だけ確定する（連打・キーリピート対策）
+ * - `undo()` は直近の評価を取り消してお題をキュー先頭に戻す
+ *
+ * @param active 補充を行うかどうか。別画面を見ている間に false にすると、
+ *   キューを保持したまま生成だけを止められる
+ */
 export function useRatingQueue({ active }: { active: boolean }) {
   const [queue, setQueue] = useState<GeneratedOdai[]>([])
   const [error, setError] = useState<string | null>(null)
@@ -131,8 +147,11 @@ export function useRatingQueue({ active }: { active: boolean }) {
     }
   }, [])
 
-  // 表示中の先頭お題への評価を確定してキューを進める。
-  // 確定できた場合はそのお題を返し、既に確定済み（連打等）なら null を返す。
+  /**
+   * 表示中の先頭お題への評価を確定してキューを進める。
+   *
+   * @returns 確定できた場合はそのお題。既に確定済み（連打等）なら null
+   */
   const rate = useCallback(
     (type: FeedbackType): GeneratedOdai | null => {
       const odai = queue[0]
@@ -150,8 +169,11 @@ export function useRatingQueue({ active }: { active: boolean }) {
     [queue],
   )
 
-  // 直近の評価を取り消す。お題をキュー先頭に戻し、サーバーの記録も削除する。
-  // 取り消した評価の内容を返し、履歴が空なら null を返す
+  /**
+   * 直近の評価を取り消す。お題をキュー先頭に戻し、サーバーの記録も削除する。
+   *
+   * @returns 取り消した評価の内容。履歴が空なら null
+   */
   const undo = useCallback((): {
     odai: GeneratedOdai
     type: FeedbackType
@@ -167,7 +189,7 @@ export function useRatingQueue({ active }: { active: boolean }) {
     return { odai: entry.odai, type: entry.type }
   }, [history])
 
-  // コピーはキューを進めない。表示中のお題に copy イベントだけ記録する
+  /** コピーはキューを進めない。表示中のお題に copy イベントだけ記録する */
   const recordCopy = useCallback(() => {
     if (current) {
       postFeedback(current.id, 'copy')

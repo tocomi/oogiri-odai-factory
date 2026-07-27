@@ -1,18 +1,22 @@
 import type { Category } from '@/types'
 
-// プロンプトの組み立てロジックを変更したら必ずバンプする。
-// お題ごとに記録され、プロンプト改善の前後で評価を比較するために使う。
-// A/Bバリアントは TECHNIQUE_VARIANTS 側で管理するので、
-// バリアントを1つ足しただけならバンプ不要
-// （generations.technique_variant に記録される）。
-//
-// 2026-07-27.2: difficulty を廃止し、シンプルさブロックを rule_only 相当に固定。
-// これ以前のデータは difficulty がランダムに振られ、シンプルさブロックも
-// 3バリアントが混ざっているため、単純比較するときは prompt_version で絞ること。
-// 2026-07-27.3: provider ごとに分けていた作風の指示を全プロバイダー共通にした。
-// 2026-07-27.4: OpenAI の注入層を system から user に変更し、3社とも
-// 単一の user ターンに揃えた。これ以前の provider 間の比較には、
-// モデルの差・プロンプト文面の差・注入層の差が混ざっている。
+/**
+ * プロンプトの組み立てロジックを変更したら必ずバンプする。
+ * お題ごとに記録され、プロンプト改善の前後で評価を比較するために使う。
+ *
+ * A/Bバリアントは {@link TECHNIQUE_VARIANTS} 側で管理するので、
+ * バリアントを1つ足しただけならバンプ不要
+ * （generations.technique_variant に記録される）。
+ *
+ * 変更履歴:
+ * - 2026-07-27.2: difficulty を廃止し、シンプルさブロックを rule_only 相当に固定。
+ *   これ以前のデータは difficulty がランダムに振られ、シンプルさブロックも
+ *   3バリアントが混ざっているため、単純比較するときは prompt_version で絞ること。
+ * - 2026-07-27.3: provider ごとに分けていた作風の指示を全プロバイダー共通にした。
+ * - 2026-07-27.4: OpenAI の注入層を system から user に変更し、3社とも
+ *   単一の user ターンに揃えた。これ以前の provider 間の比較には、
+ *   モデルの差・プロンプト文面の差・注入層の差が混ざっている。
+ */
 export const PROMPT_VERSION = '2026-07-27.4'
 
 interface Technique {
@@ -76,6 +80,7 @@ const TECHNIQUES: Technique[] = [
   },
 ]
 
+/** 配列から重複なく n 件を無作為に選ぶ（元の配列は変更しない） */
 function pickRandom<T>(arr: T[], n: number): T[] {
   const shuffled = [...arr]
   for (let i = shuffled.length - 1; i > 0; i--) {
@@ -85,6 +90,7 @@ function pickRandom<T>(arr: T[], n: number): T[] {
   return shuffled.slice(0, n)
 }
 
+/** 提示するテクニックを「テクニック集」ブロックの本文に整形する */
 function buildTechniquesSection(
   techniques: Technique[],
   showExample: boolean,
@@ -97,8 +103,10 @@ function buildTechniquesSection(
     .join('\n\n')
 }
 
-// 「シンプルさ」ブロック。以前は具体例の有無をA/Bしていたが、
-// 変数を絞るため rule_only 相当（ルールのみ・具体例なし）で固定した。
+/**
+ * 「シンプルさ」ブロック。以前は具体例の有無をA/Bしていたが、
+ * 変数を絞るため rule_only 相当（ルールのみ・具体例なし）で固定した。
+ */
 const SIMPLICITY_BLOCK = `## お題の「シンプルさ」について（最重要）
 
 良いお題は短い。設定と問いを詰め込みすぎると、答え手が迷子になる。
@@ -109,14 +117,16 @@ const SIMPLICITY_BLOCK = `## お題の「シンプルさ」について（最重
 - 状況設定と問いかけで合計3文以内に収める
 - 説明・修飾語を削っても伝わるなら削る`
 
-// --- プロンプトのバリアント（A/Bテスト用）---
-// 「テクニック集」ブロックの見せ方を均等ランダムで選び、引いたキーを
-// generations.technique_variant に記録する。
-// 評価データと突き合わせて効果を比較するのが目的なので、
-// 一度使ったキーの意味は後から変えないこと。
-// 中身を変えたいときはキーを新設し、古いキーは削除して抽選から外す
-// （意味を変えると、そのキーで記録済みの過去の評価が別物と混ざって壊れる）。
-// count が 0 のときはブロックを出さない。
+/**
+ * プロンプトのバリアント（A/Bテスト用）。
+ * 「テクニック集」ブロックの見せ方を均等ランダムで選び、引いたキーを
+ * generations.technique_variant に記録する。count が 0 のときはブロックを出さない。
+ *
+ * 評価データと突き合わせて効果を比較するのが目的なので、
+ * 一度使ったキーの意味は後から変えないこと。
+ * 中身を変えたいときはキーを新設し、古いキーは削除して抽選から外す
+ * （意味を変えると、そのキーで記録済みの過去の評価が別物と混ざって壊れる）。
+ */
 const TECHNIQUE_VARIANTS = {
   none: { count: 0, showExample: false },
   names_only: { count: 4, showExample: false },
@@ -125,14 +135,17 @@ const TECHNIQUE_VARIANTS = {
 
 export type TechniqueVariant = keyof typeof TECHNIQUE_VARIANTS
 
+/** バリアント定義から均等ランダムでキーを1つ引く */
 function pickVariantKey<T extends object>(variants: T): keyof T & string {
   const keys = Object.keys(variants) as (keyof T & string)[]
   return keys[Math.floor(Math.random() * keys.length)]
 }
 
-// 以前は provider ごとに文面を分けていたが、全プロバイダーで共通にした。
-// これで provider 間の評価差が「モデルの差」だけを表すようになる
-// （プロンプトが違うと、モデルの差なのか文面の差なのか切り分けられない）。
+/**
+ * 作風の指示。以前は provider ごとに文面を分けていたが、全プロバイダーで共通にした。
+ * これで provider 間の評価差が「モデルの差」だけを表すようになる
+ * （プロンプトが違うと、モデルの差なのか文面の差なのか切り分けられない）。
+ */
 const STYLE_PROMPT = `
 以下の点を意識してお題を作成してください：
 - 意外性のある状況設定や、具体的な数字・条件を使った、思わず考え込むお題
@@ -179,12 +192,18 @@ export const CATEGORY_PROMPTS = {
 export interface BuiltPrompt {
   prompt: string
   techniqueVariant: TechniqueVariant
-  // プロンプトに提示したテクニック名（提示順）。technique バリアントが none なら空。
-  // odais.used_technique（AIの自己申告）と突き合わせて、
-  // 「提示したのに使われなかった」テクニックまで追えるようにするため記録する。
+  /**
+   * プロンプトに提示したテクニック名（提示順）。technique バリアントが none なら空。
+   * odais.used_technique（AIの自己申告）と突き合わせて、
+   * 「提示したのに使われなかった」テクニックまで追えるようにするため記録する。
+   */
   presentedTechniques: string[]
 }
 
+/**
+ * 全プロバイダー共通のプロンプトを組み立てる。
+ * A/Bバリアントは呼び出しごとに抽選され、記録用に結果へ含めて返す。
+ */
 export function buildPrompt({
   category,
   count = 5,
@@ -270,6 +289,10 @@ export interface ParsedOdai {
   technique?: string
 }
 
+/**
+ * モデルの応答からお題を取り出す。
+ * まず JSON として解釈し、取れなければ行単位のフォールバックに落とす
+ */
 export function parseOdaiResponse(response: string): ParsedOdai[] {
   const parsed = parseJsonResponse(response)
   if (parsed.length > 0) {
@@ -278,6 +301,7 @@ export function parseOdaiResponse(response: string): ParsedOdai[] {
   return parseLinesResponse(response)
 }
 
+/** 応答中の最初の JSON 配列を解釈する。解釈できなければ空配列を返す */
 function parseJsonResponse(response: string): ParsedOdai[] {
   const start = response.indexOf('[')
   const end = response.lastIndexOf(']')
@@ -308,7 +332,7 @@ function parseJsonResponse(response: string): ParsedOdai[] {
   }
 }
 
-// JSONで返ってこなかった場合のフォールバック（テクニック帰属なし）
+/** JSONで返ってこなかった場合のフォールバック（テクニック帰属なし） */
 function parseLinesResponse(response: string): ParsedOdai[] {
   return response
     .split('\n')

@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// 評価の取り消し。POST 時に返した eventId を指定して削除する
+/** 評価の取り消し。POST 時に返した eventId を指定して削除する */
 export async function DELETE(request: NextRequest) {
   try {
     const body: FeedbackDeleteRequest = await request.json()

@@ -5,7 +5,7 @@ import type { AIProvider, Category, FeedbackType, GeneratedOdai } from '@/types'
 import type { ParsedOdai } from './prompts'
 import { PROMPT_VERSION } from './prompts'
 
-// TURSO_DATABASE_URL 未設定時はローカルファイルにフォールバックする
+/** TURSO_DATABASE_URL 未設定時はローカルファイルにフォールバックする */
 const DEFAULT_URL = 'file:data/odai.db'
 
 let client: Client | null = null
@@ -167,10 +167,14 @@ async function ensureSchema(): Promise<void> {
   return schemaReady
 }
 
-// 1回の生成リクエストを generations + odais として永続化し、
-// クライアントに返す形に変換する。
-// 永続化に失敗した場合は例外を投げる。保存されていないお題は評価もできないため、
-// 呼び出し元（生成API）ごと失敗させて「返したお題は必ず評価可能」の不変条件を保つ。
+/**
+ * 1回の生成リクエストを generations + odais として永続化し、
+ * クライアントに返す形に変換する。
+ *
+ * @returns 採番済みの id を持つお題（クライアントはこの id で評価を送る）
+ * @throws 永続化に失敗した場合。保存されていないお題は評価もできないため、
+ *   呼び出し元（生成API）ごと失敗させて「返したお題は必ず評価可能」の不変条件を保つ
+ */
 export async function persistGeneratedOdais(params: {
   parsed: ParsedOdai[]
   provider: AIProvider
@@ -235,6 +239,11 @@ export async function persistGeneratedOdais(params: {
   return odais
 }
 
+/**
+ * 評価イベントを1件記録する。
+ *
+ * @returns 記録した行の id（取り消し時に {@link deleteFeedback} へ渡す）
+ */
 export async function recordFeedback(
   odaiId: string,
   type: FeedbackType,
@@ -247,9 +256,12 @@ export async function recordFeedback(
   return Number(result.lastInsertRowid)
 }
 
-// ユーザーが評価を取り消したときに該当イベントを削除する。
-// 取り消されたイベントを残すと like/dislike の集計が実際の評価とずれるため、
-// 論理削除ではなく物理削除にしている。
+/**
+ * ユーザーが評価を取り消したときに該当イベントを削除する。
+ *
+ * 取り消されたイベントを残すと like/dislike の集計が実際の評価とずれるため、
+ * 論理削除ではなく物理削除にしている。
+ */
 export async function deleteFeedback(eventId: number): Promise<void> {
   await ensureSchema()
   await getClient().execute({
