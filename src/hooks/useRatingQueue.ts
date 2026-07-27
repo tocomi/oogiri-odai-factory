@@ -196,5 +196,14 @@ export function useRatingQueue({ active }: { active: boolean }) {
     }
   }, [current])
 
-  return { current, error, rate, undo, canUndo: history.length > 0, recordCopy }
+  return {
+    current,
+    error,
+    rate,
+    undo,
+    canUndo: history.length > 0,
+    /** 確定済みの評価数。取り消すと減るので、表示中のお題の通し番号に使える */
+    ratedCount: history.length,
+    recordCopy,
+  }
 }

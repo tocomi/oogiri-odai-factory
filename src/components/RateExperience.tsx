@@ -14,6 +14,7 @@ import type { FeedbackType, GeneratedOdai } from '@/types'
 
 type ExitingOdai = {
   odai: GeneratedOdai
+  seq: number
   type: 'like' | 'dislike'
 }
 
@@ -23,9 +24,11 @@ export default function RateExperience() {
   const [exiting, setExiting] = useState<ExitingOdai | null>(null)
 
   const { likedOdais, like, unlike } = useLikedOdais()
-  const { current, error, rate, undo, canUndo, recordCopy } = useRatingQueue({
-    active: view === 'rate',
-  })
+  const { current, error, rate, undo, canUndo, ratedCount, recordCopy } =
+    useRatingQueue({ active: view === 'rate' })
+
+  /** 表示中のお題が何枚目か。伝票の見出しに出す */
+  const seq = ratedCount + 1
 
   const handleRate = useCallback(
     (type: FeedbackType) => {
@@ -37,12 +40,12 @@ export default function RateExperience() {
       }
 
       if (type === 'like' || type === 'dislike') {
-        setExiting({ odai, type })
+        setExiting({ odai, seq, type })
       }
 
       setShowCopied(false)
     },
-    [rate, like],
+    [rate, like, seq],
   )
 
   const handleUndo = useCallback(() => {
@@ -105,12 +108,11 @@ export default function RateExperience() {
   }, [handleRate, handleUndo, copyCurrent, view])
 
   return (
-    <main className="flex h-dvh flex-col overflow-hidden p-4">
+    <main className="relative flex h-dvh flex-col overflow-hidden p-4">
       <div className="mx-auto flex min-h-0 w-full max-w-3xl flex-1 flex-col">
-        {/* ヘッダー */}
-        <header className="flex items-center justify-between py-3">
-          <h1 className="flex items-center gap-2.5 font-bold font-mincho text-ink text-lg tracking-wide sm:text-xl">
-            <span className="inline-block size-2.5 bg-shu" aria-hidden />
+        {/* ヘッダー。台紙のハッチングを断ち切る帯として置く */}
+        <header className="relative z-10 flex items-center justify-between gap-3 border-ink border-b-[3px] bg-daishi py-3">
+          <h1 className="-rotate-[1.2deg] bg-ink px-3 py-1.5 font-extrabold text-base text-daishi tracking-[0.06em] sm:text-lg">
             大喜利ネタ工場
           </h1>
           <button
@@ -120,28 +122,38 @@ export default function RateExperience() {
                 currentView === 'rate' ? 'liked' : 'rate',
               )
             }
-            className="rounded-md border border-line bg-card px-3 py-1.5 font-medium text-muted text-xs transition-colors hover:border-muted hover:text-ink focus-visible:outline-2 focus-visible:outline-ink focus-visible:outline-offset-2 sm:text-sm"
+            className="flex items-center gap-2 whitespace-nowrap border-[3px] border-ink bg-card px-3 py-1.5 font-extrabold text-ink text-xs shadow-[4px_4px_0_var(--color-ink)] transition-transform hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0_var(--color-ink)] focus-visible:outline-2 focus-visible:outline-ink focus-visible:outline-offset-4 sm:text-sm"
             aria-pressed={view === 'liked'}
           >
-            {view === 'liked'
-              ? '← 評価にもどる'
-              : `いいね一覧 (${likedOdais.length})`}
+            {view === 'liked' ? (
+              '← 評価にもどる'
+            ) : (
+              <>
+                いいね一覧
+                <span className="min-w-6 rounded-full bg-ka px-2 py-px text-center text-card">
+                  {likedOdais.length}
+                </span>
+              </>
+            )}
           </button>
         </header>
 
         {view === 'rate' && error && (
-          <p className="py-1 text-center text-shu text-xs">{error}</p>
+          <p className="relative z-10 py-1.5 text-center font-bold text-ka text-xs">
+            {error}
+          </p>
         )}
 
         {view === 'liked' ? (
           <LikedOdaiList odais={likedOdais} onBack={() => setView('rate')} />
         ) : (
           <>
-            <div className="relative flex min-h-0 flex-1 items-center justify-center py-3">
+            <div className="relative z-10 flex min-h-0 flex-1 items-center justify-center py-3">
               {current ? (
                 <OdaiCard
                   key={current.id}
                   odai={current}
+                  seq={seq}
                   copied={showCopied}
                   onCopy={copyCurrent}
                 />
@@ -153,6 +165,7 @@ export default function RateExperience() {
                 <ExitingOdaiCard
                   key={exiting.odai.id}
                   odai={exiting.odai}
+                  seq={exiting.seq}
                   type={exiting.type}
                   onAnimationEnd={() => setExiting(null)}
                 />
