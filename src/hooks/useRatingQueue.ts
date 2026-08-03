@@ -74,6 +74,8 @@ export function useRatingQueue({ active }: { active: boolean }) {
   const [error, setError] = useState<string | null>(null)
   const [retryNonce, setRetryNonce] = useState(0)
   const [history, setHistory] = useState<RatedEntry[]>([])
+  // 取り消し用の履歴上限とは独立して、表示用の通算評価数を保持する
+  const [ratedCount, setRatedCount] = useState(0)
 
   const fetchingRef = useRef(false)
   const providerIndexRef = useRef(Math.floor(Math.random() * PROVIDERS.length))
@@ -163,6 +165,7 @@ export function useRatingQueue({ active }: { active: boolean }) {
         ...h.slice(-(MAX_HISTORY - 1)),
         { odai, type, eventIdPromise },
       ])
+      setRatedCount((count) => count + 1)
       setQueue((q) => (q[0]?.id === odai.id ? q.slice(1) : q))
       return odai
     },
@@ -182,6 +185,7 @@ export function useRatingQueue({ active }: { active: boolean }) {
     if (!entry) return null
 
     setHistory((h) => h.slice(0, -1))
+    setRatedCount((count) => count - 1)
     // 戻したお題を再評価できるようにする
     ratedHeadRef.current = null
     setQueue((q) => [entry.odai, ...q])
@@ -202,8 +206,8 @@ export function useRatingQueue({ active }: { active: boolean }) {
     rate,
     undo,
     canUndo: history.length > 0,
-    /** 確定済みの評価数。取り消すと減るので、表示中のお題の通し番号に使える */
-    ratedCount: history.length,
+    /** 確定済みの通算評価数。取り消すと減るので、表示中のお題の通し番号に使える */
+    ratedCount,
     recordCopy,
   }
 }
