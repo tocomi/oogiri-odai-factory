@@ -3,9 +3,9 @@ import './globals.css'
 import { Analytics } from '@vercel/analytics/next'
 
 export const metadata: Metadata = {
-  title: '大喜利ネタ工場',
+  title: '大喜利お題工場',
   description:
-    'AIが大量生産する創造的な大喜利お題 - 大喜利ネタ工場。OpenAI、Claude、Geminiの3つのAIを使って多様な大喜利お題を工場のように量産します',
+    'AIが大量生産する創造的な大喜利お題 - 大喜利お題工場。OpenAI、Claude、Geminiの3つのAIを使って多様な大喜利お題を工場のように量産します',
 }
 
 export default function RootLayout({

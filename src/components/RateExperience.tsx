@@ -113,7 +113,7 @@ export default function RateExperience() {
         {/* ヘッダー。台紙のハッチングを断ち切る帯として置く */}
         <header className="relative z-10 flex items-center justify-between gap-3 border-ink border-b-[3px] bg-daishi py-3">
           <h1 className="-rotate-[1.2deg] bg-ink px-3 py-1.5 font-extrabold text-base text-daishi tracking-[0.06em] sm:text-lg">
-            大喜利ネタ工場
+            大喜利お題工場
           </h1>
           <button
             type="button"
