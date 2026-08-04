@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "check": "biome check --write",
-    "check-types": "tsgo --noEmit --diagnostics"
+    "check-types": "tsgo --noEmit --diagnostics",
+    "analyze": "node --env-file-if-exists=.env --env-file-if-exists=.env.local scripts/analyze.mts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.70.0",
