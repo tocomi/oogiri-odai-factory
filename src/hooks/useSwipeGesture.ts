@@ -2,8 +2,10 @@
 
 import { type PointerEvent, useRef, useState } from 'react'
 
-/** 横に動かしたと判断するまでの遊び。これ未満はタップ（コピー等）として扱う */
-const SLOP = 8
+/** 横に掴むまでの移動量。接地直後の縦揺れが先に出ても、ここまでは未決のまま待つ */
+const GRAB_X = 10
+/** 縦操作として捨てる移動量。明確な縦操作だけをブラウザのスクロール意図とみなす */
+const DROP_Y = 28
 /** 確定に必要な横移動量。カード幅に対する割合で決め、広い画面で遠くまで運ばせない */
 const THRESHOLD_RATIO = 0.25
 const THRESHOLD_MAX = 96
@@ -70,12 +72,16 @@ export function useSwipeGesture({
     const offsetY = e.clientY - gesture.startY
 
     if (!gesture.holding) {
-      // 縦方向が勝っていればスクロール等の意図とみなし、以降は手を出さない
-      if (Math.abs(offsetY) > SLOP && Math.abs(offsetY) > Math.abs(offsetX)) {
+      // 縦方向が明確に勝ったときだけスクロール等の意図とみなし、以降は手を出さない。
+      // 小さな縦揺れは未決のまま保持し、後続の横移動で掴めるようにする
+      if (
+        Math.abs(offsetY) > DROP_Y &&
+        Math.abs(offsetY) > Math.abs(offsetX) * 1.5
+      ) {
         gestureRef.current = null
         return
       }
-      if (Math.abs(offsetX) <= SLOP) return
+      if (Math.abs(offsetX) <= GRAB_X) return
 
       gesture.holding = true
       // 掴んでから捕捉する。pointerdown の時点で捕捉すると

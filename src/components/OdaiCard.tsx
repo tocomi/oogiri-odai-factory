@@ -86,7 +86,7 @@ export function OdaiCard({
       {/* 入場演出とスワイプで transform を奪い合わないよう、動かす要素を分ける */}
       <div className="animate-card-in">
         <div
-          className={`${CARD_BASE} touch-pan-y touch-pinch-zoom ${
+          className={`${CARD_BASE} touch-pinch-zoom ${
             holding
               ? 'select-none'
               : 'transition-transform duration-200 ease-out motion-reduce:transition-none'
