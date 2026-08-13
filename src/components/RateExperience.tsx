@@ -16,6 +16,8 @@ type ExitingOdai = {
   odai: GeneratedOdai
   seq: number
   type: 'like' | 'dislike'
+  /** スワイプで指を離した位置。ボタンやキーボードでの評価は 0（＝中央から捌く） */
+  offsetX: number
 }
 
 export default function RateExperience() {
@@ -31,7 +33,7 @@ export default function RateExperience() {
   const seq = ratedCount + 1
 
   const handleRate = useCallback(
-    (type: FeedbackType) => {
+    (type: FeedbackType, offsetX = 0) => {
       const odai = rate(type)
       if (!odai) return
 
@@ -40,7 +42,7 @@ export default function RateExperience() {
       }
 
       if (type === 'like' || type === 'dislike') {
-        setExiting({ odai, seq, type })
+        setExiting({ odai, seq, type, offsetX })
       }
 
       setShowCopied(false)
@@ -156,6 +158,7 @@ export default function RateExperience() {
                   seq={seq}
                   copied={showCopied}
                   onCopy={copyCurrent}
+                  onSwipe={handleRate}
                 />
               ) : (
                 <OdaiCardPlaceholder />
@@ -167,6 +170,7 @@ export default function RateExperience() {
                   odai={exiting.odai}
                   seq={exiting.seq}
                   type={exiting.type}
+                  offsetX={exiting.offsetX}
                   onAnimationEnd={() => setExiting(null)}
                 />
               )}

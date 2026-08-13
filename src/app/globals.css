@@ -63,26 +63,34 @@ body::before {
 
 /* 決裁済みの書類が捌かれる（可=右へ、否=左へ）。
    押印を見せてから飛ばすので、退場は少し遅らせて始める。
-   紙が透けると厚みが嘘になるので、消えるのは飛びきる最後だけにする */
+   紙が透けると厚みが嘘になるので、消えるのは飛びきる最後だけにする。
+   スワイプで捌いたときは --swipe-x / --swipe-rot に指を離した位置が入るので、
+   そこから続けて飛ばす（ボタン評価では 0 のまま＝中央から飛ぶ） */
 @keyframes card-out-like {
-  0%,
+  0% {
+    opacity: 1;
+    transform: translateX(var(--swipe-x, 0px)) rotate(var(--swipe-rot, 0deg));
+  }
   92% {
     opacity: 1;
   }
   to {
     opacity: 0;
-    transform: translateX(420px) rotate(8deg);
+    transform: translateX(calc(var(--swipe-x, 0px) + 420px)) rotate(8deg);
   }
 }
 
 @keyframes card-out-dislike {
-  0%,
+  0% {
+    opacity: 1;
+    transform: translateX(var(--swipe-x, 0px)) rotate(var(--swipe-rot, 0deg));
+  }
   92% {
     opacity: 1;
   }
   to {
     opacity: 0;
-    transform: translateX(-420px) rotate(-8deg);
+    transform: translateX(calc(var(--swipe-x, 0px) - 420px)) rotate(-8deg);
   }
 }
 

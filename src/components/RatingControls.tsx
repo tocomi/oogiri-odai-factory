@@ -63,6 +63,11 @@ export function RatingControls({ canRate, canUndo, onRate, onUndo }: Props) {
         </div>
       </div>
 
+      {/* スワイプの説明（キーボードのない画面向け。色ではなく言葉で向きを伝える） */}
+      <p className="text-pretty pb-2 text-center font-extrabold text-[10px] text-ink/55 sm:hidden">
+        カードを左へスワイプで なし、右へスワイプで あり
+      </p>
+
       {/* キー操作の説明（キーボードのない画面では非表示） */}
       <footer className="hidden pb-2 text-center font-extrabold text-[10px] text-ink/55 sm:block">
         <p className="flex items-center justify-center gap-4">
